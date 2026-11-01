@@ -38,6 +38,7 @@ export default function Tutor({ getContext, draft, onDraftUsed, openSettings }: 
   const { messages } = tutorChat.use();
   const s = ai.use();
   const [input, setInput] = useState("");
+  const [micDraft, setMicDraft] = useState(false); // mic text not final yet
   const [busy, setBusy] = useState(false);
   const [partial, setPartial] = useState("");
   const end = useRef<HTMLDivElement>(null);
@@ -86,10 +87,10 @@ export default function Tutor({ getContext, draft, onDraftUsed, openSettings }: 
       <div ref={end} />
     </div>
     <form className="flex items-end gap-1 border-t border-border p-2" onSubmit={(e) => { e.preventDefault(); send(input); }}>
-      <Textarea rows={2} className="min-h-0 flex-1 text-sm" placeholder="Ask Kit anything…" value={input} onChange={(e) => setInput(e.target.value)}
+      <Textarea rows={2} className={cn("min-h-0 flex-1 text-sm", micDraft && "text-muted/80")} placeholder="Ask Kit anything…" value={input} onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }} />
       <div className="flex flex-col gap-1">
-        <Mic value={input} onChange={setInput} />
+        <Mic value={input} onChange={setInput} onLive={setMicDraft} />
         <Button type="submit" size="icon" variant="primary" aria-label="Send" disabled={busy || !input.trim()}><SendHorizontal size={14} /></Button>
       </div>
     </form>

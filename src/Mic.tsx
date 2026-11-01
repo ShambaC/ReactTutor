@@ -1,7 +1,7 @@
 // Speech to text: records the microphone as 16 kHz WAV and sends it to the local Whisper endpoint of the narration engine.
 // While recording, the audio so far is re-transcribed about once a second so the words appear live in the box.
 // Falls back to the webview's own SpeechRecognition when the engine isn't running.
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Mic as MicIcon, Square } from "lucide-react";
 import { narration } from "./narration";
 import { errText } from "./store";
@@ -29,14 +29,16 @@ async function transcribe(chunks: Float32Array[], rate: number): Promise<string>
   return j.text ?? "";
 }
 
-/** Speech goes after whatever `value` held when recording started, updating live as the student talks. */
-export default function Mic({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
+/** Speech goes after whatever `value` held when recording started, updating live as the student talks.
+ * `onLive` is true while the text is still a draft (recording, or the final pass), so the box can show it dimmed. */
+export default function Mic({ value, onChange, onLive, className }: { value: string; onChange: (v: string) => void; onLive?: (live: boolean) => void; className?: string }) {
   const nar = narration.use();
   const [state, setState] = useState<"idle" | "rec" | "busy">("idle");
   const [err, setErr] = useState("");
   const stop = useRef<() => void>(() => {});
   const whisper = nar.status === "ready" && !!nar.port;
   const available = whisper || !!nativeSR();
+  useEffect(() => onLive?.(state !== "idle"), [state]);
 
   const start = async () => {
     setErr("");

@@ -48,6 +48,7 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
   const tl = useMemo(() => buildTimeline(lesson, durations), [lesson, durations]);
   const [adaptOpen, setAdaptOpen] = useState(false);
   const [adaptText, setAdaptText] = useState("");
+  const [adaptDraft, setAdaptDraft] = useState(false); // mic text not final yet
   const [adapting, setAdapting] = useState("");
   const [aiNote, setAiNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [t, setT] = useState(() => tl.segments[progress.get().pos[original.id] ?? 0]?.start ?? 0); // resume where the student left off
@@ -316,8 +317,8 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
     {(adaptOpen || adapting) && <form className="flex items-center gap-2 border-t border-border bg-accent/5 px-3 py-2" onSubmit={(e) => { e.preventDefault(); adapt(adaptText); }}>
       <Wand2 size={15} className="shrink-0 text-accent" />
       {adapting ? <span className="flex items-center gap-2 text-sm text-muted"><Loader2 size={14} className="animate-spin" />Changing the lesson for you: “{adapting}”</span> : <>
-        <Input autoFocus className="h-8 flex-1" placeholder="What would help? e.g. “explain that again more slowly”, “show it with a pet shop”, “let me build a quiz game”" value={adaptText} onChange={(e) => setAdaptText(e.target.value)} />
-        <Mic value={adaptText} onChange={setAdaptText} />
+        <Input autoFocus className={cn("h-8 flex-1", adaptDraft && "text-muted/80")} placeholder="What would help? e.g. “explain that again more slowly”, “show it with a pet shop”, “let me build a quiz game”" value={adaptText} onChange={(e) => setAdaptText(e.target.value)} />
+        <Mic value={adaptText} onChange={setAdaptText} onLive={setAdaptDraft} />
         <Button size="sm" type="submit" variant="primary" disabled={!adaptText.trim()}>Go</Button>
         <div className="hidden gap-1 xl:flex">{["Explain that again, slower", "Show me another example", "Go deeper", "Let me practice this"].map((q) => <Button key={q} size="sm" variant="ghost" onClick={() => adapt(q)}>{q}</Button>)}</div>
         <Button size="sm" variant="ghost" onClick={() => setAdaptOpen(false)}>Cancel</Button></>}

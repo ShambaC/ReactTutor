@@ -70,6 +70,7 @@ export default function Home({ open, openReview, openSettings }: { open: (id: st
   const pr = progress.use();
   const nar = narration.use();
   const [topic, setTopic] = useState("");
+  const [draft, setDraft] = useState(false); // mic text not final yet
   const [busy, setBusy] = useState("");
   const [err, setErr] = useState("");
   const total = ALL_LESSONS.length, done = ALL_LESSONS.filter((x) => pr.done[x.lesson.id]).length;
@@ -124,8 +125,8 @@ export default function Home({ open, openReview, openSettings }: { open: (id: st
             <h2 className="text-lg font-semibold">Learn anything you're curious about</h2>
             <p className="mt-1 text-sm leading-relaxed text-muted">Describe a topic or an idea you want to build. Kit writes a narrated lesson with live code and a practice exercise, just for you.</p>
             <form className="mt-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); make(topic); }}>
-              <Input className="h-11 flex-1 rounded-xl bg-surface" placeholder="e.g. “How do I make a button change color?”" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={!!busy} />
-              <Mic className="self-center" value={topic} onChange={setTopic} />
+              <Input className={cn("h-11 flex-1 rounded-xl bg-surface", draft && "text-muted/80")} placeholder="e.g. “How do I make a button change color?”" value={topic} onChange={(e) => setTopic(e.target.value)} disabled={!!busy} />
+              <Mic className="self-center" value={topic} onChange={setTopic} onLive={setDraft} />
               <Button type="submit" variant="primary" className="h-11 rounded-xl px-4" disabled={!topic.trim() || !!busy || needsAi}>{busy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}<span className="hidden sm:inline">Make my lesson</span></Button>
             </form>
             {busy ? <div className="mt-3 flex items-center gap-2 text-sm text-muted"><Loader2 size={14} className="animate-spin" />Writing a lesson about “{busy}”. This can take a minute.</div>
