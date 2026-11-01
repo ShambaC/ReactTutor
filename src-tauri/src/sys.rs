@@ -168,6 +168,9 @@ fn tts_dir(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(d)
 }
 
+/// Bumped when setup installs new packages, so existing installs run setup again (2: faster-whisper).
+const READY: &str = ".ready-2";
+
 fn venv_python(dir: &std::path::Path, mode: &str) -> PathBuf {
     let v = dir.join(format!("venv-{mode}"));
     if cfg!(windows) { v.join("Scripts").join("python.exe") } else { v.join("bin").join("python") }
@@ -190,7 +193,7 @@ pub fn tts_status(app: AppHandle, st: State<Tts>) -> Result<TtsStatus, String> {
     }
     Ok(TtsStatus {
         uv: find_uv().map(|p| p.to_string_lossy().into_owned()),
-        installed: ["gpu", "cpu"].iter().filter(|m| dir.join(format!("venv-{m}")).join(".ready").exists()).map(|m| m.to_string()).collect(),
+        installed: ["gpu", "cpu"].iter().filter(|m| dir.join(format!("venv-{m}")).join(READY).exists()).map(|m| m.to_string()).collect(),
         running: slot.as_ref().map(|(_, p)| *p),
         dir: dir.to_string_lossy().into_owned(),
     })
@@ -240,8 +243,8 @@ pub async fn tts_setup(app: AppHandle, mode: String, log: Channel<String>) -> Re
         // PyPI torch is CPU-only on Windows; cu128 wheels include Blackwell (sm_120)
         step(&log, &uv, &["pip", "install", "--python", &pys, "torch", "--index-url", "https://download.pytorch.org/whl/cu128"]).await?;
     }
-    step(&log, &uv, &["pip", "install", "--python", &pys, "kittenml", "soundfile"]).await?;
-    std::fs::write(venv.join(".ready"), "").map_err(err)?;
+    step(&log, &uv, &["pip", "install", "--python", &pys, "kittenml", "soundfile", "faster-whisper"]).await?;
+    std::fs::write(venv.join(READY), "").map_err(err)?;
     Ok(())
 }
 
@@ -260,6 +263,7 @@ pub async fn tts_start(app: AppHandle, st: State<'_, Tts>, mode: String, model: 
     cmd.arg(&script)
         .args(["--model", &model, "--device", &device, "--port", "0", "--cache"])
         .arg(&cache)
+        .args(["--parent", &std::process::id().to_string()])
         .env("PYTHONUNBUFFERED", "1")
         .env("HF_HUB_DISABLE_SYMLINKS_WARNING", "1")
         .stdin(Stdio::piped()) // kept open in `Tts`; the server exits when it closes (app quit or crash)

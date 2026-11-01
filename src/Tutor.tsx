@@ -89,7 +89,7 @@ export default function Tutor({ getContext, draft, onDraftUsed, openSettings }: 
       <Textarea rows={2} className="min-h-0 flex-1 text-sm" placeholder="Ask Kit anything…" value={input} onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }} />
       <div className="flex flex-col gap-1">
-        <Mic onText={(t) => setInput((x) => (x.trim() ? `${x.trimEnd()} ${t}` : t))} />
+        <Mic value={input} onChange={setInput} />
         <Button type="submit" size="icon" variant="primary" aria-label="Send" disabled={busy || !input.trim()}><SendHorizontal size={14} /></Button>
       </div>
     </form>

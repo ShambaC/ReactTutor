@@ -1,4 +1,5 @@
 // Speech to text: records the microphone as 16 kHz WAV and sends it to the local Whisper endpoint of the narration engine.
+// While recording, the audio so far is re-transcribed about once a second so the words appear live in the box.
 // Falls back to the webview's own SpeechRecognition when the engine isn't running.
 import { useRef, useState } from "react";
 import { Loader2, Mic as MicIcon, Square } from "lucide-react";
@@ -19,8 +20,17 @@ function wav(chunks: Float32Array[], rate: number): Blob {
 }
 
 const nativeSR = () => (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+const join = (base: string, t: string) => (base.trim() && t ? `${base.trimEnd()} ${t}` : base + t);
 
-export default function Mic({ onText, className }: { onText: (t: string) => void; className?: string }) {
+async function transcribe(chunks: Float32Array[], rate: number): Promise<string> {
+  const r = await fetch(`http://127.0.0.1:${narration.get().port}/stt`, { method: "POST", headers: { "content-type": "audio/wav" }, body: wav(chunks, rate) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.error ?? "speech recognition failed");
+  return j.text ?? "";
+}
+
+/** Speech goes after whatever `value` held when recording started, updating live as the student talks. */
+export default function Mic({ value, onChange, className }: { value: string; onChange: (v: string) => void; className?: string }) {
   const nar = narration.use();
   const [state, setState] = useState<"idle" | "rec" | "busy">("idle");
   const [err, setErr] = useState("");
@@ -33,8 +43,8 @@ export default function Mic({ onText, className }: { onText: (t: string) => void
     if (!whisper) {
       const r = new (nativeSR())();
       r.lang = "en-US";
-      r.interimResults = false;
-      r.onresult = (e: any) => onText([...e.results].map((x: any) => x[0].transcript).join(" "));
+      r.interimResults = true;
+      r.onresult = (e: any) => onChange(join(value, [...e.results].map((x: any) => x[0].transcript).join(" ").trim()));
       r.onerror = (e: any) => setErr(`Microphone: ${e.error}`);
       r.onend = () => setState("idle");
       r.start();
@@ -53,17 +63,25 @@ export default function Mic({ onText, className }: { onText: (t: string) => void
       src.connect(proc);
       proc.connect(ctx.destination);
       setState("rec");
+      const rate = ctx.sampleRate;
+      let done = false, busy = false, heard = 0;
+      const live = setInterval(async () => {
+        if (busy || chunks.length === heard) return; // one request at a time; nothing new to hear
+        busy = true;
+        heard = chunks.length;
+        try { const t = await transcribe(chunks, rate); if (!done && t) onChange(join(value, t)); } catch { /* the final pass reports errors */ }
+        busy = false;
+      }, 1000);
       stop.current = async () => {
+        done = true;
+        clearInterval(live);
         proc.disconnect(); src.disconnect(); stream.getTracks().forEach((t) => t.stop());
-        const rate = ctx.sampleRate;
         await ctx.close();
         setState("busy");
         try {
-          const r = await fetch(`http://127.0.0.1:${narration.get().port}/stt`, { method: "POST", headers: { "content-type": "audio/wav" }, body: wav(chunks, rate) });
-          const j = await r.json();
-          if (!r.ok) throw new Error(j.error ?? "speech recognition failed");
-          if (j.text) onText(j.text);
-          else setErr("I didn't catch that. Try again a little closer to the mic?");
+          const t = await transcribe(chunks, rate);
+          onChange(join(value, t));
+          if (!t) setErr("I didn't catch that. Try again a little closer to the mic?");
         } catch (e) { setErr(errText(e)); }
         setState("idle");
       };

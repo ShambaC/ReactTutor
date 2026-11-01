@@ -1,7 +1,7 @@
 """Narration server for React Tutor. Started by the app (src-tauri/src/sys.rs) inside a uv venv.
 
 POST /tts {"text": "...", "voice": "Bruno"} -> {"path": "<wav>", "duration": seconds}
-POST /stt <wav bytes>                       -> {"text": "..."}  (Whisper, loaded on first use)
+POST /stt <wav bytes>                       -> {"text": "..."}  (faster-whisper, warmed up after start)
 GET  /audio?path=<wav>                      -> the wav bytes (only files inside the cache dir)
 GET  /health                                -> {"model", "device", "voices"}
 Generated audio is cached on disk by hash(model, voice, text), so each sentence is synthesized once.
@@ -22,6 +22,7 @@ p.add_argument("--model", required=True)
 p.add_argument("--device", default="cpu")  # "cuda" or "cpu"
 p.add_argument("--port", type=int, default=0)
 p.add_argument("--cache", required=True)
+p.add_argument("--parent", type=int, default=0)  # the app's PID; we exit when it does
 args = p.parse_args()
 os.makedirs(args.cache, exist_ok=True)
 
@@ -29,7 +30,8 @@ from kittenml import KittenTTS  # noqa: E402  (slow import; after arg parsing so
 
 model = KittenTTS(args.model)
 device = args.device
-if hasattr(model, "model") and hasattr(model.model, "session"):
+legacy = hasattr(model, "model") and hasattr(model.model, "session")  # 0.8 ONNX models
+if legacy:
     # ONNX (0.8) models: the constructor builds a CPU session; rebuild it with CUDA first when asked
     import onnxruntime as ort
 
@@ -51,15 +53,29 @@ voices = list(getattr(model, "available_voices", []) or ["Bella", "Jasper", "Lun
 lock = threading.Lock()  # one synthesis at a time; the GPU model isn't re-entrant
 
 
+# The 0.8 voices talk at very different paces (Bella takes ~1.7x as long as Hugo), so each one is measured once and
+# sped up to about 160 words a minute, close to Kitten 2. Kitten 2 has no speed control and needs none.
+PACE_TEXT = "A variable is like a labelled box. You put a value inside, and later you can look at it or change it."
+PACE_SECONDS = 21 * 60 / 160
+speeds: dict = {}
+
+
 def synth(text: str, voice: str) -> dict:
-    key = hashlib.sha256(f"{args.model}|{voice}|{text}".encode()).hexdigest()[:32]
+    if legacy and voice not in speeds:
+        with lock:
+            if voice not in speeds:
+                took = len(model.generate(PACE_TEXT, voice=voice, clean_text=True)) / rate
+                speeds[voice] = round(max(1.0, took / PACE_SECONDS), 2)
+    speed = speeds.get(voice, 1.0)
+    tag = f"|{speed}" if speed != 1.0 else ""  # unchanged keys for voices that need no speed-up
+    key = hashlib.sha256(f"{args.model}|{voice}{tag}|{text}".encode()).hexdigest()[:32]
     path = os.path.join(args.cache, f"{key}.wav")
     if not os.path.exists(path):
         with lock:
             if not os.path.exists(path):
-                try:
-                    audio = model.generate(text, voice=voice, clean_text=True)
-                except TypeError:  # Kitten 2 has no clean_text flag (it normalizes by default)
+                if legacy:
+                    audio = model.generate(text, voice=voice, speed=speed, clean_text=True)
+                else:  # Kitten 2 has no clean_text flag (it normalizes by default)
                     audio = model.generate(text, voice=voice)
                 tmp = path + ".tmp.wav"
                 sf.write(tmp, audio, rate)
@@ -73,19 +89,22 @@ stt_lock = threading.Lock()
 
 
 def transcribe(wav: bytes) -> str:
+    """Whisper via faster-whisper (CTranslate2): several times faster than the transformers pipeline, no torch needed."""
     global stt
     import io
 
     import numpy as np
+    from faster_whisper import WhisperModel
 
     with stt_lock:
         if stt is None:
-            import torch
-            from transformers import pipeline
-
-            cuda = device == "cuda" and torch.cuda.is_available()
-            name = "openai/whisper-small.en" if cuda else "openai/whisper-base.en"
-            stt = pipeline("automatic-speech-recognition", model=name, device=0 if cuda else -1, torch_dtype=torch.float16 if cuda else torch.float32)
+            if device == "cuda":
+                try:
+                    stt = WhisperModel("small.en", device="cuda", compute_type="float16")
+                except Exception as e:  # CUDA libraries missing: CPU still works
+                    print(f"speech-to-text on GPU failed, using CPU: {e}", flush=True)
+            if stt is None:
+                stt = WhisperModel("base.en", device="cpu", compute_type="int8")
         audio, sr = sf.read(io.BytesIO(wav), dtype="float32")
         if audio.ndim > 1:
             audio = audio.mean(axis=1)
@@ -95,7 +114,8 @@ def transcribe(wav: bytes) -> str:
             audio = librosa.resample(audio, orig_sr=sr, target_sr=16000)
         if len(audio) < 1600 or float(np.abs(audio).max()) < 1e-3:
             return ""
-        return stt({"raw": audio, "sampling_rate": 16000})["text"].strip()
+        segments, _ = stt.transcribe(audio, language="en", beam_size=1, vad_filter=True)
+        return " ".join(t for t in (s.text.strip() for s in segments) if t.strip(" .")).strip()  # drop "." filler segments
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -166,7 +186,18 @@ threading.Thread(target=warm_stt, daemon=True).start()
 
 
 def exit_with_app():
-    sys.stdin.read()  # the app holds our stdin open; EOF means it closed or crashed
+    if os.name == "nt" and args.parent:
+        # Windows: wait on the app's process handle. A thread blocked reading stdin makes every DLL loaded later
+        # (scipy's BLAS during the Whisper warmup) hang in its runtime startup, which froze the whole server.
+        import ctypes
+
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x00100000, False, args.parent)  # SYNCHRONIZE
+        if not h:
+            return
+        k32.WaitForSingleObject(h, 0xFFFFFFFF)
+    else:
+        sys.stdin.read()  # the app holds our stdin open; EOF means it closed or crashed
     os._exit(0)
 
 

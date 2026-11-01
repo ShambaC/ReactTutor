@@ -50,7 +50,7 @@ export default function App() {
   else if (view.page === "home") body = <Home open={open} openReview={() => setView({ page: "review" })} openSettings={openSettings} />;
 
   const nav = (v: View, icon: React.ReactNode, label: string) => <Button size="icon" variant="ghost" aria-label={label} title={label}
-    className={cn(view.page === v.page && "bg-surface-2 text-fg")} onClick={() => setView(v)}>{icon}</Button>;
+    className={cn(view.page === v.page && "bg-surface-2 text-fg")} onClick={() => { if (v.page === "home") setLessonId(undefined); setView(v); }}>{icon}</Button>; // Home closes the lesson; Settings/Review keep it
   return <div className="flex h-full">
     <nav className="flex w-12 shrink-0 flex-col items-center gap-1 border-r border-border bg-surface py-2">
       <img src="/logo.png" alt="React Tutor" className="mb-2 h-8 w-8 rounded-lg" />

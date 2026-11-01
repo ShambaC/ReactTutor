@@ -16,6 +16,7 @@ import Preview, { type PreviewHandle, type TestResult } from "./Preview";
 import { buildTimeline, estimateSeconds, frameAt, segmentAt } from "./timeline";
 
 const PAD = 0.35; // breath between narration clips
+const PAUSED = "Paused. Try typing: the editor is yours!";
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
 
 export interface LessonApi {
@@ -171,7 +172,7 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); L.playing = false; L.step = -1; audio.current?.pause(); browserStop(); };
+    return () => { cancelAnimationFrame(raf); L.playing = false; L.step = -1; L.buffering = false; setBuffering(false); audio.current?.pause(); browserStop(); };
   }, [playing, startStep]);
 
   const play = () => {
@@ -284,9 +285,10 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
         <div className="relative min-h-0 flex-1">
           <Editor file={open} files={Object.keys(files)} value={files[open] ?? ""} readOnly={playing} onChange={edit} onRun={runMine}
             highlight={editing ? undefined : frame.highlight} caret={playing && open === frame.open ? frame.caret : undefined} fontSize={p.fontSize} dark={p.theme === "dark"} />
-          {!playing && !editing && !challenge && t > 0 && !finished && <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-surface/90 px-2 py-1 text-[11px] text-muted shadow">Paused. Try typing: the editor is yours!</div>}
-          {p.captions && seg && (playing || buffering) && <div className="pointer-events-none absolute inset-x-6 bottom-4 flex justify-center">
-            <div className="max-w-2xl rounded-lg bg-black/80 px-3 py-1.5 text-center text-sm text-white">{seg.step.say}</div></div>}
+          {!playing && !editing && !challenge && t > 0 && !finished && !(p.captions && seg) && <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-surface/90 px-2 py-1 text-[11px] text-muted shadow">{PAUSED}</div>}
+          {p.captions && seg && !editing && !challenge && !finished && (playing || buffering || t > 0) && <div className="pointer-events-none absolute inset-x-6 bottom-4 flex justify-center">
+            <div className="max-w-2xl rounded-lg bg-black/80 px-3 py-1.5 text-center text-sm text-white">{seg.step.say}
+              {!playing && !buffering && <div className="mt-0.5 text-[11px] text-white/60">{PAUSED}</div>}</div></div>}
         </div>
       </div>
       {/* preview / challenge */}
@@ -315,7 +317,7 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
       <Wand2 size={15} className="shrink-0 text-accent" />
       {adapting ? <span className="flex items-center gap-2 text-sm text-muted"><Loader2 size={14} className="animate-spin" />Changing the lesson for you: “{adapting}”</span> : <>
         <Input autoFocus className="h-8 flex-1" placeholder="What would help? e.g. “explain that again more slowly”, “show it with a pet shop”, “let me build a quiz game”" value={adaptText} onChange={(e) => setAdaptText(e.target.value)} />
-        <Mic onText={(t) => setAdaptText((x) => (x.trim() ? `${x.trimEnd()} ${t}` : t))} />
+        <Mic value={adaptText} onChange={setAdaptText} />
         <Button size="sm" type="submit" variant="primary" disabled={!adaptText.trim()}>Go</Button>
         <div className="hidden gap-1 xl:flex">{["Explain that again, slower", "Show me another example", "Go deeper", "Let me practice this"].map((q) => <Button key={q} size="sm" variant="ghost" onClick={() => adapt(q)}>{q}</Button>)}</div>
         <Button size="sm" variant="ghost" onClick={() => setAdaptOpen(false)}>Cancel</Button></>}
