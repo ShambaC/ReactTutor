@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* All colors live here. App.tsx sets data-theme. */
+:root,
+:root[data-theme="light"] {
+  --bg: #f7f8fc; --surface: #ffffff; --surface-2: #eef0f7; --border: #dde1ec;
+  --text: #141824; --text-muted: #5d6478;
+  --accent: #0b8fb3; --accent-hover: #087a99; --accent-2: #7c5cff;
+  --success: #2f8a4a; --warning: #b26b00; --danger: #c2410c;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0c1020; --surface: #121831; --surface-2: #1a2142; --border: #262f55;
+  --text: #e8ecf8; --text-muted: #9aa3c2;
+  --accent: #4fd6f7; --accent-hover: #7ae2fa; --accent-2: #a58bff;
+  --success: #6fd08c; --warning: #f2b75c; --danger: #f08a7a;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg); --color-surface: var(--surface); --color-surface-2: var(--surface-2);
+  --color-border: var(--border); --color-fg: var(--text); --color-muted: var(--text-muted);
+  --color-accent: var(--accent); --color-accent-hover: var(--accent-hover); --color-accent-2: var(--accent-2);
+  --color-success: var(--success); --color-warning: var(--warning); --color-danger: var(--danger);
+  --font-sans: "Segoe UI Variable", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Cascadia Code", "Cascadia Mono", ui-monospace, Consolas, monospace;
+}
+
+html { font-size: 14px; }
+html, body, #root { height: 100%; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; overflow: hidden; overflow-wrap: break-word; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* editor teaching marks */
+.cm-teach-highlight { background: color-mix(in srgb, var(--accent) 28%, transparent); border-radius: 3px; box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent); }
+.cm-ghost-caret { display: inline-block; width: 2px; height: 1.15em; margin-left: -1px; vertical-align: text-bottom; background: var(--accent-2); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0.2; } }
+
+/* markdown */
+.prose-rt > * + * { margin-top: 0.6em; }
+.prose-rt h1, .prose-rt h2, .prose-rt h3 { font-weight: 600; margin-top: 1em; }
+.prose-rt h2 { font-size: 1.1em; }
+.prose-rt ul { list-style: disc; padding-left: 1.3em; }
+.prose-rt ol { list-style: decimal; padding-left: 1.3em; }
+.prose-rt li + li { margin-top: 0.2em; }
+.prose-rt code { font-family: var(--font-mono); font-size: 0.9em; background: var(--surface-2); padding: 0.05em 0.3em; border-radius: 4px; }
+.prose-rt pre { background: var(--surface-2); padding: 0.7em; border-radius: 8px; overflow-x: auto; }
+.prose-rt pre code { background: none; padding: 0; }
+.prose-rt a { color: var(--accent); text-decoration: underline; }
+.prose-rt strong { font-weight: 600; }
