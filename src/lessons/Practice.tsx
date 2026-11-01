@@ -88,7 +88,7 @@ export default function Practice({ lesson, api }: { lesson: PracticeLesson; api:
         {names.map((n) => <button key={n} onClick={() => setOpen(n)} className={cn("whitespace-nowrap border-b-2 px-3 py-2 font-mono text-xs cursor-pointer", n === open ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg")}>{n}</button>)}
         <Button size="sm" className="ml-auto mr-1" onClick={run}><Play size={12} />Run</Button>
       </div>
-      <div className="min-h-0 flex-1"><Editor file={open} value={files[open] ?? ""} readOnly={false} onChange={(v) => save({ ...files, [open]: v })} onRun={run} fontSize={p.fontSize} dark={p.theme === "dark"} /></div>
+      <div className="min-h-0 flex-1"><Editor file={open} files={Object.keys(files)} value={files[open] ?? ""} readOnly={false} onChange={(v) => save({ ...files, [open]: v })} onRun={run} fontSize={p.fontSize} dark={p.theme === "dark"} /></div>
     </div>
     <div className="min-h-0 flex-1"><Preview ref={preview} onAsk={api.ask} /></div></Split>
   </Split>;

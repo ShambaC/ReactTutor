@@ -3,11 +3,12 @@ import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import { Compartment, EditorState, StateEffect, StateField } from "@codemirror/state";
 import { Decoration, type DecorationSet, WidgetType, keymap } from "@codemirror/view";
-import { javascript } from "@codemirror/lang-javascript";
+import { javascript, javascriptLanguage } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { indentWithTab } from "@codemirror/commands";
+import { jsCompletions } from "./completions";
 
 class Caret extends WidgetType {
   toDOM() { const s = document.createElement("span"); s.className = "cm-ghost-caret"; return s; }
@@ -24,7 +25,8 @@ const marks = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f),
 });
 
-const lang = (file: string) => (file.endsWith(".html") ? html() : file.endsWith(".css") ? css() : javascript({ jsx: true }));
+const lang = (file: string, files: () => string[]) => (file.endsWith(".html") ? html() : file.endsWith(".css") ? css()
+  : [javascript({ jsx: true }), jsCompletions(files).map((autocomplete) => javascriptLanguage.data.of({ autocomplete }))]);
 
 export interface EditorProps {
   file: string;
@@ -36,14 +38,17 @@ export interface EditorProps {
   caret?: number;
   fontSize: number;
   dark: boolean;
+  /** Project file names, offered in import paths. */
+  files?: string[];
 }
 
-export default function Editor({ file, value, readOnly, onChange, onRun, highlight, caret, fontSize, dark }: EditorProps) {
+export default function Editor({ file, value, readOnly, onChange, onRun, highlight, caret, fontSize, dark, files }: EditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const comp = useRef({ lang: new Compartment(), ro: new Compartment(), theme: new Compartment(), size: new Compartment() });
-  const cb = useRef({ onChange, onRun });
-  cb.current = { onChange, onRun };
+  const cb = useRef({ onChange, onRun, files });
+  cb.current = { onChange, onRun, files };
+  const fileList = () => cb.current.files ?? [];
 
   useEffect(() => {
     const c = comp.current;
@@ -54,7 +59,7 @@ export default function Editor({ file, value, readOnly, onChange, onRun, highlig
         extensions: [
           basicSetup,
           keymap.of([indentWithTab, { key: "Mod-s", preventDefault: true, run: () => { cb.current.onRun?.(); return true; } }]),
-          c.lang.of(lang(file)),
+          c.lang.of(lang(file, fileList)),
           c.ro.of([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]),
           c.theme.of(dark ? oneDark : []),
           c.size.of(EditorView.theme({ "&": { fontSize: `${fontSize}px` } })),
@@ -70,7 +75,7 @@ export default function Editor({ file, value, readOnly, onChange, onRun, highlig
 
   useEffect(() => {
     const v = view.current!, c = comp.current;
-    v.dispatch({ effects: [c.lang.reconfigure(lang(file)), c.ro.reconfigure([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]), c.theme.reconfigure(dark ? oneDark : []), c.size.reconfigure(EditorView.theme({ "&": { fontSize: `${fontSize}px` } }))] });
+    v.dispatch({ effects: [c.lang.reconfigure(lang(file, fileList)), c.ro.reconfigure([EditorState.readOnly.of(readOnly), EditorView.editable.of(!readOnly)]), c.theme.reconfigure(dark ? oneDark : []), c.size.reconfigure(EditorView.theme({ "&": { fontSize: `${fontSize}px` } }))] });
   }, [file, readOnly, dark, fontSize]);
 
   useEffect(() => {

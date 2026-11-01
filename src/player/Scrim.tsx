@@ -282,7 +282,7 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
           </div>
         </div>
         <div className="relative min-h-0 flex-1">
-          <Editor file={open} value={files[open] ?? ""} readOnly={playing} onChange={edit} onRun={runMine}
+          <Editor file={open} files={Object.keys(files)} value={files[open] ?? ""} readOnly={playing} onChange={edit} onRun={runMine}
             highlight={editing ? undefined : frame.highlight} caret={playing && open === frame.open ? frame.caret : undefined} fontSize={p.fontSize} dark={p.theme === "dark"} />
           {!playing && !editing && !challenge && t > 0 && !finished && <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-surface/90 px-2 py-1 text-[11px] text-muted shadow">Paused. Try typing: the editor is yours!</div>}
           {p.captions && seg && (playing || buffering) && <div className="pointer-events-none absolute inset-x-6 bottom-4 flex justify-center">
