@@ -9,9 +9,9 @@ Watch narrated coding lessons, pause at any moment to edit the code yourself, an
 
 [![Latest release](https://img.shields.io/github/v/release/ShambaC/ReactTutor?label=download&color=2ea44f)](https://github.com/ShambaC/ReactTutor/releases/latest)
 [![Build](https://img.shields.io/github/actions/workflow/status/ShambaC/ReactTutor/release.yml?label=build)](https://github.com/ShambaC/ReactTutor/actions/workflows/release.yml)
-[![Downloads](https://img.shields.io/github/downloads/ShambaC/ReactTutor/total?color=blue)](https://github.com/YOUR-GITHUB-USERNAME/react-tutor/releases)
+[![Downloads](https://img.shields.io/github/downloads/ShambaC/ReactTutor/total?color=blue)](https://github.com/ShambaC/ReactTutor/releases)
 [![Platforms](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-informational)](#-install-it-in-2-minutes)
-[![Stars](https://img.shields.io/github/stars/ShambaC/ReactTutor?style=social)](https://github.com/YOUR-GITHUB-USERNAME/react-tutor/stargazers)
+[![Stars](https://img.shields.io/github/stars/ShambaC/ReactTutor?style=social)](https://github.com/ShambaC/ReactTutor/stargazers)
 
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8DB?logo=tauri&logoColor=white)](https://tauri.app)
@@ -65,7 +65,7 @@ You do **not** need to install Node.js, a code editor or anything else. Just dow
 
 ### Windows (10 or 11)
 
-1. Go to the [**latest release**](https://github.com/YOUR-GITHUB-USERNAME/react-tutor/releases/latest).
+1. Go to the [**latest release**](https://github.com/ShambaC/ReactTutor/releases/latest).
 2. Under **Assets**, download the file ending in **`-setup.exe`**.
 3. Double-click it and follow the installer.
 4. If Windows shows **"Windows protected your PC"**, click **More info**, then **Run anyway**.
@@ -74,7 +74,7 @@ You do **not** need to install Node.js, a code editor or anything else. Just dow
 
 ### Linux
 
-1. Go to the [**latest release**](https://github.com/YOUR-GITHUB-USERNAME/react-tutor/releases/latest).
+1. Go to the [**latest release**](https://github.com/ShambaC/ReactTutor/releases/latest).
 2. Pick one:
     - **Ubuntu, Debian, Linux Mint:** download the **`.deb`** file and double-click it to install.
     - **Fedora, openSUSE:** download the **`.rpm`** file and double-click it to install.
