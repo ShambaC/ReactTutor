@@ -219,10 +219,11 @@ async fn step(log: &Channel<String>, program: &PathBuf, args: &[&str]) -> Result
 
 /// Creates the venv for `mode` ("gpu": CUDA PyTorch + Kitten TTS 2, "cpu": ONNX Kitten models) with uv.
 #[tauri::command]
-pub async fn tts_setup(app: AppHandle, mode: String, log: Channel<String>) -> Result<(), String> {
+pub async fn tts_setup(app: AppHandle, st: State<'_, Tts>, mode: String, log: Channel<String>) -> Result<(), String> {
     if mode != "gpu" && mode != "cpu" {
         return Err("mode must be gpu or cpu".into());
     }
+    stop_tts(&st); // a running engine locks files in its venv that pip may need to replace
     let uv = match find_uv() {
         Some(p) => {
             let _ = log.send(format!("Using the uv already on this PC: {}", p.display()));
@@ -238,7 +239,11 @@ pub async fn tts_setup(app: AppHandle, mode: String, log: Channel<String>) -> Re
     let venv = dir.join(format!("venv-{mode}"));
     let py = venv_python(&dir, &mode);
     let pys = py.to_string_lossy().into_owned();
-    step(&log, &uv, &["venv", "--python", "3.12", "--allow-existing", &venv.to_string_lossy()]).await?;
+    // re-running setup on an existing venv only adds packages: on Windows `uv venv --allow-existing` fails
+    // ("Failed to create Python executable link ... The file exists") when python.exe is already there
+    if !py.exists() {
+        step(&log, &uv, &["venv", "--python", "3.12", "--allow-existing", &venv.to_string_lossy()]).await?;
+    }
     if mode == "gpu" {
         // PyPI torch is CPU-only on Windows; cu128 wheels include Blackwell (sm_120)
         step(&log, &uv, &["pip", "install", "--python", &pys, "torch", "--index-url", "https://download.pytorch.org/whl/cu128"]).await?;
