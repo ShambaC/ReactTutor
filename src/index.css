@@ -3,17 +3,17 @@
 /* All colors live here. App.tsx sets data-theme. */
 :root,
 :root[data-theme="light"] {
-  --bg: #f7f8fc; --surface: #ffffff; --surface-2: #eef0f7; --border: #dde1ec;
-  --text: #141824; --text-muted: #5d6478;
-  --accent: #0b8fb3; --accent-hover: #087a99; --accent-2: #7c5cff;
-  --success: #2f8a4a; --warning: #b26b00; --danger: #c2410c;
+  --bg: #f5f4f0; --surface: #fdfcfa; --surface-2: #ecebe5; --border: #dfddd5;
+  --text: #22262d; --text-muted: #646b75;
+  --accent: #2a8394; --accent-hover: #226e7d; --accent-2: #7a68c9;
+  --success: #3d8a5c; --warning: #a86d14; --danger: #b8503a;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
-  --bg: #0c1020; --surface: #121831; --surface-2: #1a2142; --border: #262f55;
-  --text: #e8ecf8; --text-muted: #9aa3c2;
-  --accent: #4fd6f7; --accent-hover: #7ae2fa; --accent-2: #a58bff;
-  --success: #6fd08c; --warning: #f2b75c; --danger: #f08a7a;
+  --bg: #13171e; --surface: #191e27; --surface-2: #222833; --border: #2c3340;
+  --text: #e3e6eb; --text-muted: #949cab;
+  --accent: #6cc3cf; --accent-hover: #8ad2db; --accent-2: #a99be6;
+  --success: #82c79c; --warning: #e2b46f; --danger: #e08b7b;
   color-scheme: dark;
 }
 
@@ -27,10 +27,13 @@
 }
 
 html { font-size: 14px; }
+body { line-height: 1.5; }
 html, body, #root { height: 100%; }
 body { background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; overflow: hidden; overflow-wrap: break-word; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 * { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+body.resizing { user-select: none; }
+body.resizing iframe, body.resizing .cm-editor { pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
 /* editor teaching marks */

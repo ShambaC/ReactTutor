@@ -70,6 +70,9 @@ Lesson code lives inside JS template literals. Inside them, write `\${` for a li
 
 - Order lessons scrim → its practice → scrim → its practice …, quiz last. The validator requires at least as many
   practice lessons as scrims, a quiz, and at least one challenge **with tests** in every scrim.
+- Teaching order: a challenge, practice or quiz may only use concepts, syntax and APIs already taught in an earlier
+  lesson or earlier in the same scrim (including `#id` selectors, `+`, arrow functions, and so on). If a demo needs
+  something new, add a short `say` explaining it first, or leave it out.
 - Starters must not throw while rendering (a `___` inside a JSX expression crashes the validator run); put blanks in
   text, strings or property names.
 - Students can also ask Kit for unlimited extra practice on any lesson ("Practice this" / "More practice like this").

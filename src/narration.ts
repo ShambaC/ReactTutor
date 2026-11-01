@@ -27,7 +27,8 @@ export interface NarrationState {
   device?: string;
   log: string[];
   error?: string;
-  uv?: boolean;
+  /** Path of the system uv, null when setup must install it. */
+  uv?: string | null;
 }
 export const narration = persisted<NarrationState>(null, { status: "checking", voices: [], log: [] });
 const set = (p: Partial<NarrationState>) => narration.set((s) => ({ ...s, ...p }));
@@ -66,15 +67,11 @@ async function start(choice: EngineChoice) {
   set({ status: "ready", port, voices: h.voices, device: h.device });
 }
 
-/** Installs the Python engine with uv (streams the log), then starts it. */
+/** Installs the Python engine with uv (streams the log; Rust installs uv first when it is missing), then starts it. */
 export async function setupNarration(): Promise<void> {
   const choice = narration.get().engine ?? currentChoice()!;
   set({ status: "installing", log: [], error: undefined });
   try {
-    if (!(await tts.status()).uv) {
-      set({ log: ["Installing uv (a small Python manager)..."] });
-      await tts.installUv();
-    }
     await tts.setup(choice.mode, (l) => narration.set((s) => ({ ...s, log: [...s.log.slice(-200), l] })));
     await start(choice);
   } catch (x) {
@@ -126,8 +123,15 @@ export function browserSpeak(text: string, rate: number): void {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(speakable(text));
   u.rate = rate;
+  u.volume = prefs.get().volume;
   const v = speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang) && /natural|online|aria|jenny|zira/i.test(x.name)) ?? speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang));
   if (v) u.voice = v;
   speechSynthesis.speak(u);
+}
+/** Plays a narration clip at the student's volume. */
+export function playClip(url: string): void {
+  const a = new Audio(url);
+  a.volume = prefs.get().volume;
+  a.play().catch(() => {});
 }
 export const browserStop = () => { if ("speechSynthesis" in window) speechSynthesis.cancel(); };

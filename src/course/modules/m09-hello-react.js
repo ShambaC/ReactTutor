@@ -118,7 +118,7 @@ export default function App() {
           highlight: 'import App from "./App.jsx";',
         },
         {
-          say: "Last line. Create root, with the root div, dot render, and our App used like an H T M L tag. Look at the preview! Our heading appears.",
+          say: "Last line. Get element by id finds the root div, like query selector does. Create root takes charge of it, dot render, and our App used like an H T M L tag. Look at the preview! Our heading appears.",
           files: { "index.js": indexJs },
           highlight: 'createRoot(document.getElementById("root")).render(<App />);',
         },

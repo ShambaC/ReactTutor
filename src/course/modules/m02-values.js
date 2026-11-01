@@ -177,46 +177,38 @@ true
 number
 \`\`\`
 
-- \`userName\` holds the **text** Sam.
-- \`age\` holds the **number** 12.
-- \`isStudent\` holds the **boolean** true.
-- The last blank is the name of the variable whose type we ask about.
+- The first blank is the **text** Sam.
+- The second blank is the **number** 12.
+- The third blank is the **boolean** true.
+- The last blank is a value whose type we ask about: use a number.
 
 Press **Run**, then **Check my code**.`,
       files: {
         "index.html": page(),
         "index.js": L(
-          "const userName = ___;",
-          "const age = ___;",
-          "const isStudent = ___;",
-          "",
-          "console.log(userName);",
-          "console.log(age);",
-          "console.log(isStudent);",
+          "console.log(___);",
+          "console.log(___);",
+          "console.log(___);",
           "console.log(typeof ___);"
         ),
       },
       solution: {
         "index.js": L(
-          'const userName = "Sam";',
-          "const age = 12;",
-          "const isStudent = true;",
-          "",
-          "console.log(userName);",
-          "console.log(age);",
-          "console.log(isStudent);",
-          "console.log(typeof age);"
+          'console.log("Sam");',
+          "console.log(12);",
+          "console.log(true);",
+          "console.log(typeof 12);"
         ),
       },
       hints: [
         "Text needs quotes. Numbers and booleans do not.",
         'The first three blanks are values: "Sam", 12 and true.',
-        "The last blank is a variable name. Ask for the type of age, which should print number.",
+        "The last blank is a value. Ask for the type of the number 12, which should print number.",
       ],
       tests: [
         { name: "The console prints Sam, 12 and true", code: 'return logs[0] === "Sam" && logs[1] === "12" && logs[2] === "true";' },
         { name: "The last line prints number", code: 'return logs[3] === "number";' },
-        { name: "Sam is text, so it has quotes", code: 'return /userName\\s*=\\s*["\'][^"\']*["\']/.test(files()["index.js"]);' },
+        { name: "Sam is text, so it has quotes", code: 'return /console\\.log\\(\\s*["\']Sam["\']\\s*\\)/.test(files()["index.js"]);' },
       ],
     },
     {
@@ -340,12 +332,12 @@ Press **Run**. The console should show your name and 10.`,
       task: `Fill in each blank (\`___\`) so that the console prints:
 
 \`\`\`
-Hello, Lena!
+Hello Lena
 Visits: 1
 \`\`\`
 
 - \`greeting\` should hold the text **Hello**.
-- \`visits\` should start at the number **0**, then go up by **1**.
+- \`visits\` should start at the number **0**, then be replaced with **1**.
 - The last blank is the name of the variable to print.
 
 Press **Run**, then **Check my code**.`,
@@ -356,10 +348,10 @@ Press **Run**, then **Check my code**.`,
           "const friend = \"Lena\";",
           "let visits = ___;",
           "",
-          "visits = visits + ___;",
+          "visits = ___;",
           "",
-          'console.log(greeting + ", " + friend + "!");',
-          'console.log("Visits: " + ___);'
+          "console.log(greeting, friend);",
+          'console.log("Visits:", ___);'
         ),
       },
       solution: {
@@ -368,19 +360,19 @@ Press **Run**, then **Check my code**.`,
           'const friend = "Lena";',
           "let visits = 0;",
           "",
-          "visits = visits + 1;",
+          "visits = 1;",
           "",
-          'console.log(greeting + ", " + friend + "!");',
-          'console.log("Visits: " + visits);'
+          "console.log(greeting, friend);",
+          'console.log("Visits:", visits);'
         ),
       },
       hints: [
         "The first blank is text, so it needs quotes. The second blank is a number, so it does not.",
-        "The third blank is how much to add to visits. The last blank is the name of the box that holds the count.",
+        "The third blank is the new number to put in visits. The last blank is the name of the box that holds the count.",
         'The answers, in order: "Hello", 0, 1, visits.',
       ],
       tests: [
-        { name: 'The console prints "Hello, Lena!"', code: 'return logs.some((l) => l === "Hello, Lena!");' },
+        { name: 'The console prints "Hello Lena"', code: 'return logs.some((l) => l === "Hello Lena");' },
         { name: 'The console prints "Visits: 1"', code: 'return logs.some((l) => l === "Visits: 1");' },
       ],
     },

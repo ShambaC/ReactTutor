@@ -177,18 +177,18 @@ Then print the title and the pages with two \`console.log\` lines, using dot acc
 3. \`shield\`
 4. \`Zara is level 7\`
 
-Use dot access, bracket access, an array index, and destructuring. Then press **Run** and **Check my code**.`,
+Use dot access, bracket access, and an array index. Then press **Run** and **Check my code**.`,
       files: {
         "index.html": html,
-        "index.js": 'const player = {\n  name: "Zara",\n  level: 7,\n  items: ["sword", "shield"],\n};\n\nconsole.log(player.___);\nconsole.log(player["___"]);\nconsole.log(player.items[___]);\n\nconst { name, level } = ___;\nconsole.log(`${___} is level ${level}`);\n',
+        "index.js": 'const player = {\n  name: "Zara",\n  level: 7,\n  items: ["sword", "shield"],\n};\n\nconsole.log(player.___);\nconsole.log(player["___"]);\nconsole.log(player.items[___]);\n\nconsole.log(player.name + " is level " + player.___);\n',
       },
       solution: {
-        "index.js": 'const player = {\n  name: "Zara",\n  level: 7,\n  items: ["sword", "shield"],\n};\n\nconsole.log(player.name);\nconsole.log(player["level"]);\nconsole.log(player.items[1]);\n\nconst { name, level } = player;\nconsole.log(`${name} is level ${level}`);\n',
+        "index.js": 'const player = {\n  name: "Zara",\n  level: 7,\n  items: ["sword", "shield"],\n};\n\nconsole.log(player.name);\nconsole.log(player["level"]);\nconsole.log(player.items[1]);\n\nconsole.log(player.name + " is level " + player.level);\n',
       },
       hints: [
         "The first two blanks are keys: the labels on the drawers. Look at the object at the top.",
-        "Arrays count from zero, and the shield is the second item. The destructuring line unpacks from the player object.",
-        "The answers in order are: name, level, 1, player, name.",
+        "Arrays count from zero, and the shield is the second item. The last line joins pieces of text with a plus sign, and the blank is the key for the level.",
+        "The answers in order are: name, level, 1, level.",
       ],
       tests: [
         { name: "Zara is printed", code: 'return logs.some((l) => l.trim() === "Zara");' },

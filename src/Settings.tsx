@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Cpu, Loader2, Plus, RefreshCw, Trash2, Volume2 } from "lucide-react";
+import { ArrowLeft, Check, Cpu, Loader2, Plus, RefreshCw, Trash2, Volume2 } from "lucide-react";
 import { ai, listModels } from "./ai";
 import { PROVIDER_PRESETS } from "./ai/providers/presets";
 import { USAGE_URL, codexModels } from "./ai/providers/oauth";
 import { oauth, secrets, type OAuthStatus } from "./ai/rust";
 import type { ProviderConfig } from "./ai/types";
-import { ENGINES, initNarration, narration, recommend, setupNarration, synth, browserSpeak } from "./narration";
+import { ENGINES, initNarration, narration, recommend, setupNarration, synth, browserSpeak, playClip } from "./narration";
 import { errText, prefs, progress, type Prefs } from "./store";
 import { Badge, Button, Card, Confirm, Field, Input, Select, Tabs } from "./ui";
 
@@ -133,7 +133,7 @@ function VoiceSection() {
   const test = () => {
     const line = "Hi! I'm your narrator. Let's learn React together, one small step at a time.";
     const c = synth(line);
-    if (c) c.then((x) => new Audio(x.url).play()).catch(() => {});
+    if (c) c.then((x) => playClip(x.url)).catch(() => {});
     else browserSpeak(line, p.rate);
   };
   return <div className="space-y-4">
@@ -154,24 +154,29 @@ function VoiceSection() {
     <Card className="space-y-2 p-3 text-sm">
       <div className="flex items-center gap-2">Status: <Badge tone={n.status === "ready" ? "success" : n.status === "error" ? "danger" : "muted"}>{n.status === "ready" ? `ready on ${n.device}` : n.status}</Badge>
         {(n.status === "checking" || n.status === "starting" || n.status === "installing") && <Loader2 size={14} className="animate-spin" />}</div>
-      {n.status === "needs-setup" && n.engine && <><div className="text-muted">One-time setup: {n.engine.label}, {n.engine.size}. It installs a private Python environment with <code>uv</code>{n.uv ? "" : " (uv will be installed first)"}. It may take several minutes.</div>
+      {n.status === "needs-setup" && n.engine && <><div className="text-muted">One-time setup: {n.engine.label}, {n.engine.size}. It installs a private Python environment with <code>uv</code>. It may take several minutes.</div>
+        <div className={n.uv ? "text-muted" : "text-warning"}>{n.uv ? <>Uses the uv already on this PC: <code className="break-all">{n.uv}</code></> : <>uv (the tool that sets up Python for the voice engine) isn't installed on this PC. Setup will install it for you first, from uv's official installer.</>}</div>
         <Button variant="primary" onClick={setupNarration}>Set up natural narration</Button></>}
       {n.status === "starting" && <div className="text-muted">Starting the voice engine. The first start downloads the voice model, so it can take a few minutes.</div>}
       {n.error && <pre className="max-h-40 overflow-auto whitespace-pre-wrap text-xs text-danger">{n.error}</pre>}
       {(n.status === "error" || n.status === "starting") && <Button size="sm" onClick={initNarration}><RefreshCw size={12} />Try again</Button>}
       {n.log.length > 0 && <pre className="max-h-48 overflow-auto rounded bg-surface-2 p-2 text-[11px] text-muted">{n.log.slice(-60).join("\n")}</pre>}
     </Card>
+    <Field label={`Volume: ${Math.round(p.volume * 100)}%`}><input type="range" min={0} max={1} step={0.05} value={p.volume} onChange={(e) => prefs.set((x) => ({ ...x, volume: Number(e.target.value) }))} className="w-full accent-[var(--accent)]" /></Field>
     {n.voices.length > 0 && <Field label="Voice"><Select value={p.voice} onChange={(e) => prefs.set((x) => ({ ...x, voice: e.target.value }))}>{n.voices.map((v) => <option key={v}>{v}</option>)}</Select></Field>}
     <Button onClick={test}><Volume2 size={14} />Test the voice</Button>
   </div>;
 }
 
-export default function Settings() {
+export default function Settings({ back }: { back?: () => void }) {
   const [sec, setSec] = useState<Sec>("ai");
   const p = prefs.use();
   const [reset, setReset] = useState(false);
   return <div className="flex h-full min-h-0 flex-col">
-    <Tabs tabs={SECTIONS.map((s) => ({ id: s.id, label: s.label }))} value={sec} onChange={setSec} />
+    <div className="flex items-center gap-2 border-b border-border pr-2">
+      <div className="min-w-0 flex-1"><Tabs tabs={SECTIONS.map((s) => ({ id: s.id, label: s.label }))} value={sec} onChange={setSec} /></div>
+      {back && <Button size="sm" variant="primary" onClick={back}><ArrowLeft size={12} />Back to your lesson</Button>}
+    </div>
     <div className="min-h-0 flex-1 overflow-y-auto p-6"><div className="mx-auto max-w-3xl">
       {sec === "ai" && <AiSection />}
       {sec === "voice" && <VoiceSection />}
@@ -183,7 +188,7 @@ export default function Settings() {
       {sec === "progress" && <div className="space-y-3 text-sm">
         <p className="text-muted">Your progress, your code and your custom lessons are saved on this computer.</p>
         <Button variant="danger" onClick={() => setReset(true)}>Reset all progress</Button>
-        <Confirm open={reset} danger title="Reset all progress?" confirmLabel="Reset" onClose={() => setReset(false)} onConfirm={() => progress.set(() => ({ done: {}, code: {}, review: {}, notes: {}, custom: [] }))}>
+        <Confirm open={reset} danger title="Reset all progress?" confirmLabel="Reset" onClose={() => setReset(false)} onConfirm={() => progress.set(() => ({ done: {}, code: {}, review: {}, notes: {}, pos: {}, custom: [] }))}>
           <p>This clears finished lessons, your saved code, review questions and custom lessons. It can't be undone.</p>
         </Confirm>
       </div>}

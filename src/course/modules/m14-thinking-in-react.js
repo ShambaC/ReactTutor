@@ -475,7 +475,7 @@ Because the screen is built from data, adding a todo to the array adds a row. Th
         },
         { say: "Each box has one job. That's the rule of thumb. If you can describe a part in one short sentence, it's probably a good component." },
         {
-          say: "Step two: build a static version. Static means it only shows things and doesn't change yet. We start at the smallest box, TodoItem. It receives a title and a done flag as props.",
+          say: "Step two: build a static version. Static means it only shows things, so the checkbox is read only for now. We start at the smallest box, TodoItem. It receives a title and a done flag as props.",
           files: { "TodoItem.jsx": todoItemStatic },
           open: "TodoItem.jsx",
           highlight: "{ title, done }",

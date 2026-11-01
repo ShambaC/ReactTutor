@@ -76,7 +76,7 @@ export default function Mic({ onText, className }: { onText: (t: string) => void
   return <span className={cn("relative inline-flex", className)}>
     <Button size="icon" variant={state === "rec" ? "danger" : "ghost"} disabled={!available || state === "busy"}
       aria-label={state === "rec" ? "Stop recording" : "Speak instead of typing"}
-      title={available ? (state === "rec" ? "Click to stop and send what you said" : "Talk instead of typing") : "Set up the voice engine in Settings → Voice to use the microphone"}
+      title={available ? (state === "rec" ? "Click to stop. Your words go into the box so you can check them before sending" : "Talk instead of typing") : "Set up the voice engine in Settings → Voice to use the microphone"}
       onClick={() => (state === "rec" ? stop.current() : start())}>
       {state === "busy" ? <Loader2 size={15} className="animate-spin" /> : state === "rec" ? <Square size={13} /> : <MicIcon size={15} />}
     </Button>

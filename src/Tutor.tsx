@@ -6,7 +6,7 @@ import { TUTOR_SYSTEM, contextBlock, type TutorContext } from "./ai/tutor";
 import type { ChatMessage } from "./ai/types";
 import Markdown from "./Markdown";
 import Mic from "./Mic";
-import { browserSpeak, synth } from "./narration";
+import { browserSpeak, playClip, synth } from "./narration";
 import { errText, persisted, prefs } from "./store";
 import { Button, Select, Textarea, cn } from "./ui";
 
@@ -30,7 +30,7 @@ export function ModelPicker({ className }: { className?: string }) {
 function speak(text: string) {
   const plain = text.replace(/```[\s\S]*?```/g, " (see the code in the chat) ").replace(/[*_#>`]/g, "").slice(0, 1500);
   const c = synth(plain);
-  if (c) c.then((x) => new Audio(x.url).play()).catch(() => {});
+  if (c) c.then((x) => playClip(x.url)).catch(() => {});
   else browserSpeak(plain, prefs.get().rate);
 }
 
@@ -59,10 +59,9 @@ export default function Tutor({ getContext, draft, onDraftUsed, openSettings }: 
     try {
       const ctx = contextBlock(getContext());
       const msgs: ChatMessage[] = [{ role: "system", content: TUTOR_SYSTEM + (ctx ? `\n\n# What the student is looking at right now\n${ctx}` : "") }, ...history.slice(-16)];
-      let acc = "";
-      const answer = await chat(msgs, (d) => { acc += d; setPartial(acc); });
-      tutorChat.set(() => ({ messages: [...history, { role: "assistant", content: answer || acc }] }));
-      if (prefs.get().speakReplies) speak(answer || acc);
+      const answer = await chat(msgs, setPartial);
+      tutorChat.set(() => ({ messages: [...history, { role: "assistant", content: answer }] }));
+      if (prefs.get().speakReplies) speak(answer);
     } catch (e) {
       tutorChat.set(() => ({ messages: [...history, { role: "assistant", content: `I couldn't reach the AI model just now (${errText(e)}). That's a connection problem, not something you did. Check Settings → AI tutor, or try again in a moment.` }] }));
     }
@@ -90,7 +89,7 @@ export default function Tutor({ getContext, draft, onDraftUsed, openSettings }: 
       <Textarea rows={2} className="min-h-0 flex-1 text-sm" placeholder="Ask Kit anything…" value={input} onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }} />
       <div className="flex flex-col gap-1">
-        <Mic onText={(t) => send(t)} />
+        <Mic onText={(t) => setInput((x) => (x.trim() ? `${x.trimEnd()} ${t}` : t))} />
         <Button type="submit" size="icon" variant="primary" aria-label="Send" disabled={busy || !input.trim()}><SendHorizontal size={14} /></Button>
       </div>
     </form>

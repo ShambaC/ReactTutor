@@ -54,7 +54,7 @@ export const oauth = {
 export interface HwInfo { gpus: { name: string; vendor: "nvidia" | "amd" | "intel" | "other"; vram_bytes: number }[]; ram_bytes: number; cpus: number }
 export const hwInfo = () => invoke<HwInfo>("hw_info");
 
-export interface TtsStatus { uv: boolean; installed: ("gpu" | "cpu")[]; running: number | null; dir: string }
+export interface TtsStatus { /** Path of the uv the setup will use, or null when it must be installed. */ uv: string | null; installed: ("gpu" | "cpu")[]; running: number | null; dir: string }
 export const tts = {
   status: () => invoke<TtsStatus>("tts_status"),
   setup(mode: "gpu" | "cpu", onLog: (line: string) => void) {
@@ -64,7 +64,6 @@ export const tts = {
   },
   start: (mode: "gpu" | "cpu", model: string, device: "cuda" | "cpu") => invoke<number>("tts_start", { mode, model, device }),
   stop: () => invoke<void>("tts_stop"),
-  installUv: () => invoke<void>("install_uv"),
 };
 
 export const inTauri = () => "__TAURI_INTERNALS__" in window;

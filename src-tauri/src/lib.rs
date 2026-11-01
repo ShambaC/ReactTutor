@@ -34,7 +34,6 @@ pub fn run() {
       sys::tts_setup,
       sys::tts_start,
       sys::tts_stop,
-      sys::install_uv,
     ])
     .build(tauri::generate_context!())
     .expect("error while building tauri application")

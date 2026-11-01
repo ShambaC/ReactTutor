@@ -109,7 +109,7 @@ You can create a new file with the file list in the editor. Every file that uses
           say: "Check the console. Hello, Sam! The code works exactly as before, but the function now lives in its own file. This kind of export is called a named export, because we use its name in the curly braces.",
         },
         {
-          say: "A file can export as many things as it likes. Let's add another function, and a constant. Each one gets its own export word.",
+          say: "A file can export as many things as it likes. Let's add another function, and a constant. Each one gets its own export word. The new function uses to upper case, a built-in text tool that makes letters capital.",
           files: { "greet.js": greetFile2 },
           open: "greet.js",
           highlight: 'export const appName = "Hello Lab";',

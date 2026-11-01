@@ -1,5 +1,5 @@
 // Hand-built shadcn-style primitives. Colors come from tokens in index.css only.
-import { useEffect, useRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
+import { useEffect, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from "react";
 import { X } from "lucide-react";
 
 export const cn = (...a: (string | false | null | undefined)[]) => a.filter(Boolean).join(" ");
@@ -86,3 +86,55 @@ export function Confirm({ open, title, children, confirmLabel = "Confirm", dange
 
 export const Empty = ({ children }: { children: ReactNode }) => <p className="py-8 text-center text-sm text-muted">{children}</p>;
 export const Mono = ({ children }: { children: ReactNode }) => <span className="font-mono text-[11px] text-muted">{children}</span>;
+
+/**
+ * Two panes with a draggable divider. `size` is the share (%) of the pane on `side`; the student's size is remembered under `id`.
+ * `dir="auto"` lays the panes side by side, or stacks them when the space is narrower than `stackBelow` px.
+ * A missing pane (null/false) gives the other one all the space.
+ */
+export function Split({ id, dir = "row", size = 50, side = "start", min = 140, stackBelow = 720, className, children: [a, b] }: {
+  id: string; dir?: "row" | "col" | "auto"; size?: number; side?: "start" | "end"; min?: number; stackBelow?: number; className?: string; children: [ReactNode, ReactNode];
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const key = `rt.split.${id}`;
+  const [pct, setPct] = useState(() => { const v = Number(localStorage.getItem(key)); return v > 0 && v < 100 ? v : size; });
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    if (dir !== "auto" || !box.current) return;
+    const ro = new ResizeObserver(([e]) => setNarrow(e.contentRect.width < stackBelow));
+    ro.observe(box.current);
+    return () => ro.disconnect();
+  }, [dir, stackBelow]);
+  const row = dir === "row" || (dir === "auto" && !narrow);
+  if (!a || !b) return <div className={cn("flex min-h-0 min-w-0", className)}><div className="flex min-h-0 min-w-0 flex-1 flex-col">{a || b}</div></div>;
+
+  const drag = (e: React.PointerEvent) => {
+    const r = box.current!.getBoundingClientRect(), total = row ? r.width : r.height, from = row ? r.left : r.top;
+    const move = (ev: PointerEvent) => {
+      const at = (row ? ev.clientX : ev.clientY) - from;
+      const px = Math.min(total - min, Math.max(min, side === "start" ? at : total - at));
+      setPct((px / total) * 100);
+    };
+    const up = () => {
+      document.body.classList.remove("resizing");
+      window.removeEventListener("pointermove", move);
+      setPct((v) => { try { localStorage.setItem(key, String(v)); } catch { /* keep in memory */ } return v; });
+    };
+    e.preventDefault();
+    document.body.classList.add("resizing"); // iframes and the editor would swallow the drag otherwise
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up, { once: true });
+  };
+  const sized = { flex: `0 0 ${pct}%` };
+  const pane = "flex min-h-0 min-w-0 flex-col overflow-hidden";
+  return <div ref={box} className={cn("flex min-h-0 min-w-0", row ? "flex-row" : "flex-col", className)}>
+    <div className={cn(pane, side === "end" && "flex-1")} style={side === "start" ? sized : undefined}>{a}</div>
+    <div role="separator" aria-orientation={row ? "vertical" : "horizontal"} tabIndex={0} title="Drag to resize (double-click to reset)"
+      onPointerDown={drag} onDoubleClick={() => { setPct(size); try { localStorage.removeItem(key); } catch { /* ignore */ } }}
+      onKeyDown={(e) => { const d = (e.key === "ArrowRight" || e.key === "ArrowDown" ? 2 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -2 : 0) * (side === "start" ? 1 : -1); if (d) setPct((v) => Math.min(90, Math.max(10, v + d))); }}
+      className={cn("group relative z-10 shrink-0 bg-border transition-colors hover:bg-accent focus-visible:bg-accent", row ? "w-px cursor-col-resize" : "h-px cursor-row-resize")}>
+      <span className={cn("absolute", row ? "inset-y-0 -left-1.5 -right-1.5" : "inset-x-0 -top-1.5 -bottom-1.5")} />
+    </div>
+    <div className={cn(pane, side === "start" && "flex-1")} style={side === "end" ? sized : undefined}>{b}</div>
+  </div>;
+}

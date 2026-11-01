@@ -625,7 +625,7 @@ One click on **Add 3** should take the count from 0 to 3.`),
       highlight: "const [chores, setChores] = useState([",
     },
     {
-      say: "Let's add a button that adds a chore. A natural way: push a new chore onto the array, then call set chores. It looks right. Try clicking it.",
+      say: "Let's add a button that adds a chore. A natural way: push a new chore onto the array, then call set chores. The new id comes from Date dot now, a number that is different every time. It looks right. Try clicking it.",
       files: { "App.jsx": choresApp(addMutate, liPlain, addButton) },
       highlight: "chores.push(",
     },

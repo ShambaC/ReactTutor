@@ -27,12 +27,18 @@ export interface Progress {
   review: Record<string, number>;
   last?: string;
   notes: Record<string, string>;
+  /** Where the student left each narrated lesson (step index), so Home can resume it. */
+  pos: Record<string, number>;
   /** Lessons the AI made on topics the student chose. */
   custom: Lesson[];
 }
-export const progress = persisted<Progress>("rt.progress", { done: {}, code: {}, review: {}, notes: {}, custom: [] });
+export const progress = persisted<Progress>("rt.progress", { done: {}, code: {}, review: {}, notes: {}, pos: {}, custom: [] });
 
-export const markDone = (id: string) => progress.set((p) => ({ ...p, done: { ...p.done, [id]: true } }));
+export const markDone = (id: string) => progress.set((p) => {
+  const pos = { ...p.pos };
+  delete pos[id]; // finished: next visit starts from the top
+  return { ...p, done: { ...p.done, [id]: true }, pos };
+});
 
 export interface Prefs {
   theme: "dark" | "light";
@@ -43,7 +49,9 @@ export interface Prefs {
   captions: boolean;
   fontSize: number;
   speakReplies: boolean;
+  /** Narration and read-aloud volume, 0 to 1. */
+  volume: number;
 }
-export const prefs = persisted<Prefs>("rt.prefs", { theme: "dark", voice: "Bella", engine: "auto", rate: 1, captions: true, fontSize: 14, speakReplies: false });
+export const prefs = persisted<Prefs>("rt.prefs", { theme: "dark", voice: "Bella", engine: "auto", rate: 1, captions: true, fontSize: 14, speakReplies: false, volume: 1 });
 
 export const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));

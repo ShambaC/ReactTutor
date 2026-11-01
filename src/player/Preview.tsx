@@ -3,7 +3,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, MessageCircleQuestion, RotateCw, Trash2 } from "lucide-react";
 import type { Files, Test } from "../course/types";
-import { Button, cn } from "../ui";
+import { Button, Split, cn } from "../ui";
 import { explainError } from "./friendlyErrors";
 
 export interface ConsoleEntry { level: string; text: string; file?: string; line?: number }
@@ -80,6 +80,7 @@ const Preview = forwardRef<PreviewHandle, { onAsk?: (q: string) => void; showCon
           value={typed ?? `localhost${url}`} onFocus={() => setTyped(url)} onBlur={() => setTyped(null)} onChange={(e) => setTyped(e.target.value)} />
       </form>
     </div>
+    <Split id="console" dir="col" side="end" size={24} min={56} className="flex-1">
     <div className="relative min-h-0 flex-1 bg-white">
       {runId > 0 && <iframe key={runId} ref={frame} title="Preview" src="/sandbox/index.html" className="h-full w-full border-0" />}
       {runId === 0 && <div className="flex h-full items-center justify-center text-sm text-neutral-500">Press Run (Ctrl+S) to see your page here.</div>}
@@ -90,7 +91,7 @@ const Preview = forwardRef<PreviewHandle, { onAsk?: (q: string) => void; showCon
         {onAsk && <Button size="sm" className="mt-2" onClick={() => onAsk(`I got this error and I'm not sure what it means:\n\n${firstError.text}${firstError.file ? ` (${firstError.file}${firstError.line ? ` line ${firstError.line}` : ""})` : ""}`)}><MessageCircleQuestion size={12} />Ask Kit about this</Button>}
       </div>}
     </div>
-    {showConsole && <div className="flex h-36 shrink-0 flex-col border-t border-border">
+    {showConsole && <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex items-center justify-between px-2 py-1 text-[11px] font-medium text-muted">Console
         <Button size="icon" variant="ghost" aria-label="Clear console" className="h-6 w-6" onClick={() => { logRef.current = []; setLog([]); }}><Trash2 size={12} /></Button></div>
       <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-1 font-mono text-xs select-text">
@@ -98,6 +99,7 @@ const Preview = forwardRef<PreviewHandle, { onAsk?: (q: string) => void; showCon
         {log.map((e, i) => <div key={i} className={cn("whitespace-pre-wrap border-b border-border/40 py-0.5", e.level === "error" ? "text-danger" : e.level === "warn" ? "text-warning" : "text-fg")}>{e.text}</div>)}
       </div>
     </div>}
+    </Split>
   </div>;
 });
 export default Preview;

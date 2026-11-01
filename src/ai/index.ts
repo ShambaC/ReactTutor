@@ -54,16 +54,17 @@ export function selectedModel(): { provider: LlmProvider; model: string; label: 
 export const stripThink = (t: string) => t.replace(/<think>[\s\S]*?(<\/think>|$)/g, "").replace(/^[\s\S]*?<\/think>/, "").trimStart();
 
 /** Streams when the provider can; resolves with the full text (thinking removed). `json`: ask for JSON output (JSON mode where the provider has one). */
-export async function chat(messages: ChatMessage[], onDelta: (t: string) => void, max_tokens = 1500, json?: object): Promise<string> {
+/** `onText` gets the whole reply so far (think blocks removed), not just the new piece. */
+export async function chat(messages: ChatMessage[], onText: (t: string) => void, max_tokens = 1500, json?: object): Promise<string> {
   const sel = selectedModel();
   if (!sel) throw new Error("No AI model chosen yet. Pick one in Settings → AI tutor.");
   const req = { model: sel.model === "default" ? "" : sel.model, messages, max_tokens, ...(json && { json_schema: json }) };
   let raw = "";
   if (sel.provider.chatStream && !(json && sel.provider.capabilities.json_mode)) {
-    raw = (await sel.provider.chatStream(req, (d) => { raw += d; onDelta(stripThink(raw)); })).text;
+    raw = (await sel.provider.chatStream(req, (d) => { raw += d; onText(stripThink(raw)); })).text;
   } else {
     raw = (await sel.provider.chat(req)).text;
-    onDelta(stripThink(raw));
+    onText(stripThink(raw));
   }
   return stripThink(raw);
 }

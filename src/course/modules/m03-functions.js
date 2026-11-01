@@ -192,8 +192,7 @@ Hello, Ada!
 \`\`\`
 
 1. Name the first function \`morning\`, then **call** it twice.
-2. The second function needs a **parameter** called \`person\`.
-3. Call \`sayHello\` with the **argument** \`"Ada"\`.
+2. Name the second function \`sayHello\`, then **call** it once.
 
 Press **Run**, then **Check my code**.`,
       files: {
@@ -206,11 +205,11 @@ Press **Run**, then **Check my code**.`,
           "___();",
           "___();",
           "",
-          "function sayHello(___) {",
-          '  console.log("Hello, " + person + "!");',
+          "function ___() {",
+          '  console.log("Hello, Ada!");',
           "}",
           "",
-          "sayHello(___);"
+          "___();"
         ),
       },
       solution: {
@@ -222,17 +221,17 @@ Press **Run**, then **Check my code**.`,
           "morning();",
           "morning();",
           "",
-          "function sayHello(person) {",
-          '  console.log("Hello, " + person + "!");',
+          "function sayHello() {",
+          '  console.log("Hello, Ada!");',
           "}",
           "",
-          'sayHello("Ada");'
+          "sayHello();"
         ),
       },
       hints: [
         "The name in a call must match the name in the declaration exactly. The first three blanks are all morning.",
-        "A parameter is a placeholder name inside the round brackets. The body already uses a name: person.",
-        'The last blank is the argument, the real value: "Ada" in quotes.',
+        "The last two blanks are the second function's name, once in the declaration and once in the call.",
+        "The answers, in order: morning, morning, morning, sayHello, sayHello.",
       ],
       tests: [
         { name: "Good morning! is printed twice", code: 'return logs.filter((l) => l === "Good morning!").length === 2;' },
@@ -363,7 +362,7 @@ The console should show \`Ada Lovelace\`. Remember: use **return**, not console.
 
 1. \`makeGreeting(name)\` **returns** the text \`Hello, \` + the name + \`!\`
 2. \`average(a, b)\` **returns** the average of two numbers (add them, divide by 2)
-3. \`showOnPage(message)\` puts the message into the paragraph with the id \`output\`
+3. \`showOnPage(message)\` puts the message into the paragraph on the page (find it with \`document.querySelector("p")\`)
 
 Then call them like this:
 
@@ -372,8 +371,7 @@ showOnPage(makeGreeting("Sam"));
 console.log(average(4, 10));
 \`\`\`
 
-The page should show **Hello, Sam!** and the console should show **7**. Use function declarations or arrow functions, whichever you like.
-
+The page should show **Hello, Sam!** and the console should show **7**.
 Press **Run**, then **Check my code**.`,
       files: {
         "index.html": page('\n    <h1>Helper functions</h1>\n    <p id="output">...</p>'),
@@ -382,7 +380,7 @@ Press **Run**, then **Check my code**.`,
           "",
           "// 2. average(a, b) returns the average of two numbers",
           "",
-          '// 3. showOnPage(message) puts the message in the paragraph with id "output"',
+          "// 3. showOnPage(message) puts the message in the paragraph",
           "",
           "// Now use them:"
         ),
@@ -393,10 +391,12 @@ Press **Run**, then **Check my code**.`,
           '  return "Hello, " + name + "!";',
           "}",
           "",
-          "const average = (a, b) => (a + b) / 2;",
+          "function average(a, b) {",
+          "  return (a + b) / 2;",
+          "}",
           "",
           "function showOnPage(message) {",
-          '  const output = document.querySelector("#output");',
+          '  const output = document.querySelector("p");',
           "  output.textContent = message;",
           "}",
           "",
@@ -406,8 +406,8 @@ Press **Run**, then **Check my code**.`,
       },
       hints: [
         'Start with the first one: function makeGreeting(name) { return "Hello, " + name + "!"; }',
-        "average can be an arrow function in the short form: const average = (a, b) => (a + b) / 2; Round brackets around a + b make the addition happen first.",
-        'showOnPage finds the paragraph with document.querySelector("#output") and sets its textContent to message. Then call both functions at the bottom.',
+        "average returns (a + b) / 2. Round brackets around a + b make the addition happen first.",
+        'showOnPage finds the paragraph with document.querySelector("p") and sets its textContent to message. Then call both functions at the bottom.',
       ],
       tests: [
         { name: "The page shows Hello, Sam!", code: 'return text("#output") === "Hello, Sam!";' },

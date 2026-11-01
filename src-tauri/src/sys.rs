@@ -175,7 +175,7 @@ fn venv_python(dir: &std::path::Path, mode: &str) -> PathBuf {
 
 #[derive(Serialize)]
 pub struct TtsStatus {
-    uv: bool,
+    uv: Option<String>,
     installed: Vec<String>,
     running: Option<u16>,
     dir: String,
@@ -189,7 +189,7 @@ pub fn tts_status(app: AppHandle, st: State<Tts>) -> Result<TtsStatus, String> {
         *slot = None;
     }
     Ok(TtsStatus {
-        uv: resolve("uv").is_some(),
+        uv: find_uv().map(|p| p.to_string_lossy().into_owned()),
         installed: ["gpu", "cpu"].iter().filter(|m| dir.join(format!("venv-{m}")).join(".ready").exists()).map(|m| m.to_string()).collect(),
         running: slot.as_ref().map(|(_, p)| *p),
         dir: dir.to_string_lossy().into_owned(),
@@ -220,7 +220,17 @@ pub async fn tts_setup(app: AppHandle, mode: String, log: Channel<String>) -> Re
     if mode != "gpu" && mode != "cpu" {
         return Err("mode must be gpu or cpu".into());
     }
-    let uv = resolve("uv").ok_or("uv was not found. Install it from the Narration settings, then try again.")?;
+    let uv = match find_uv() {
+        Some(p) => {
+            let _ = log.send(format!("Using the uv already on this PC: {}", p.display()));
+            p
+        }
+        None => {
+            let _ = log.send("uv isn't on this PC yet, so it is being installed first (it sets up Python for the voice engine).".into());
+            install_uv(&log).await?;
+            find_uv().ok_or("uv was installed but couldn't be found. Restart the app and try again.")?
+        }
+    };
     let dir = tts_dir(&app)?;
     let venv = dir.join(format!("venv-{mode}"));
     let py = venv_python(&dir, &mode);
@@ -303,26 +313,20 @@ pub fn tts_stop(st: State<Tts>) {
     stop_tts(&st);
 }
 
-/// Opens the uv installer (official script) in a visible PowerShell window so the student sees what runs.
-#[tauri::command]
-pub async fn install_uv() -> Result<(), String> {
-    let status = if cfg!(windows) {
-        Command::new("powershell").args(["-ExecutionPolicy", "ByPass", "-c", "irm https://astral.sh/uv/install.ps1 | iex"]).status().await
+/// uv on PATH, or where its official installer puts it (PATH changes only reach new processes).
+fn find_uv() -> Option<PathBuf> {
+    resolve("uv").or_else(|| {
+        let home = PathBuf::from(std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" })?);
+        let exe = if cfg!(windows) { "uv.exe" } else { "uv" };
+        [home.join(".local").join("bin"), home.join(".cargo").join("bin")].into_iter().map(|d| d.join(exe)).find(|p| p.is_file())
+    })
+}
+
+/// Runs uv's official installer, streaming its output to the setup log.
+async fn install_uv(log: &Channel<String>) -> Result<(), String> {
+    if cfg!(windows) {
+        step(log, &PathBuf::from("powershell"), &["-NoProfile", "-ExecutionPolicy", "ByPass", "-c", "irm https://astral.sh/uv/install.ps1 | iex"]).await
     } else {
-        Command::new("sh").args(["-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"]).status().await
-    };
-    if !status.map_err(err)?.success() {
-        return Err("uv installer failed".into());
+        step(log, &PathBuf::from("sh"), &["-c", "curl -LsSf https://astral.sh/uv/install.sh | sh"]).await
     }
-    // the installer adds uv to PATH for new processes only; make it visible to this one too
-    if let Some(home) = std::env::var_os(if cfg!(windows) { "USERPROFILE" } else { "HOME" }) {
-        let bin = PathBuf::from(home).join(".local").join("bin");
-        let mut paths: Vec<PathBuf> = std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()).collect();
-        if !paths.contains(&bin) {
-            paths.push(bin);
-            // SAFETY: PATH is only read when spawning tools; a racing reader just sees the old value
-            unsafe { std::env::set_var("PATH", std::env::join_paths(paths).map_err(err)?) };
-        }
-    }
-    Ok(())
 }

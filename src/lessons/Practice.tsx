@@ -10,7 +10,7 @@ import Editor from "../player/Editor";
 import Preview, { type PreviewHandle, type TestResult } from "../player/Preview";
 import { MoreButton, type LessonApi } from "../player/Scrim";
 import { errText, markDone, prefs, progress } from "../store";
-import { Badge, Button, Confirm, cn } from "../ui";
+import { Badge, Button, Confirm, Split, cn } from "../ui";
 
 const KIND = { fill: "Fill in the blanks", fix: "Fix the bug", build: "Build it" };
 
@@ -56,8 +56,8 @@ export default function Practice({ lesson, api }: { lesson: PracticeLesson; api:
   };
   const allOk = results && results.every((r) => r.ok);
 
-  return <div className="grid h-full min-h-0 grid-cols-[minmax(260px,320px)_1fr_1fr]">
-    <aside className="flex min-h-0 flex-col overflow-y-auto border-r border-border p-4">
+  return <Split id="practice-task" size={26} min={220} className="h-full">
+    <aside className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4">
       <div className="mb-2 flex items-center gap-2"><Badge tone="accent">{KIND[lesson.type]}</Badge>{done && <Badge tone="success"><CheckCircle2 size={11} />done</Badge>}</div>
       <Markdown text={lesson.task} className="text-sm" />
       <div className="mt-3 space-y-1.5">{lesson.hints.slice(0, hints).map((h, i) => <div key={i} className="flex gap-1.5 rounded-lg bg-warning/10 p-2 text-xs"><Lightbulb size={13} className="mt-0.5 shrink-0 text-warning" /><Markdown text={h} /></div>)}</div>
@@ -78,18 +78,18 @@ export default function Practice({ lesson, api }: { lesson: PracticeLesson; api:
         <MoreButton api={api} label="More practice like this" />
         {(allOk || (review?.correct && !lesson.tests.length)) && api.next && <Button size="sm" variant="primary" onClick={api.next}>Next lesson</Button>}
       </div>
+      <Confirm open={peek} onClose={() => setPeek(false)} title="Peek at the solution?" confirmLabel="Show me" onConfirm={() => save({ ...files, ...lesson.solution })}>
+        <p>Totally fine to peek. Reading a solution is a great way to learn! Your current code will be replaced by the solution, so you can study it and run it.</p>
+        <p>Tip: afterwards, press <b>Start over</b> and try writing it again from memory.</p>
+      </Confirm>
     </aside>
-    <div className="flex min-h-0 flex-col border-r border-border">
-      <div className="flex items-center gap-0.5 border-b border-border bg-surface px-1">
+    <Split id="code" dir="auto" className="h-full flex-1"><div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center gap-0.5 overflow-x-auto border-b border-border bg-surface px-1">
         {names.map((n) => <button key={n} onClick={() => setOpen(n)} className={cn("whitespace-nowrap border-b-2 px-3 py-2 font-mono text-xs cursor-pointer", n === open ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg")}>{n}</button>)}
         <Button size="sm" className="ml-auto mr-1" onClick={run}><Play size={12} />Run</Button>
       </div>
       <div className="min-h-0 flex-1"><Editor file={open} value={files[open] ?? ""} readOnly={false} onChange={(v) => save({ ...files, [open]: v })} onRun={run} fontSize={p.fontSize} dark={p.theme === "dark"} /></div>
     </div>
-    <div className="min-h-0"><Preview ref={preview} onAsk={api.ask} /></div>
-    <Confirm open={peek} onClose={() => setPeek(false)} title="Peek at the solution?" confirmLabel="Show me" onConfirm={() => save({ ...files, ...lesson.solution })}>
-      <p>Totally fine to peek. Reading a solution is a great way to learn! Your current code will be replaced by the solution, so you can study it and run it.</p>
-      <p>Tip: afterwards, press <b>Start over</b> and try writing it again from memory.</p>
-    </Confirm>
-  </div>;
+    <div className="min-h-0 flex-1"><Preview ref={preview} onAsk={api.ask} /></div></Split>
+  </Split>;
 }

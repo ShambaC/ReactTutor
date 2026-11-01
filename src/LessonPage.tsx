@@ -12,7 +12,7 @@ import Markdown from "./Markdown";
 import Scrim, { type LessonApi } from "./player/Scrim";
 import { progress } from "./store";
 import Tutor from "./Tutor";
-import { Button, Tabs, Textarea, cn } from "./ui";
+import { Button, Split, Tabs, Textarea, cn } from "./ui";
 
 function Outline({ current, open }: { current: string; open: (id: string) => void }) {
   const pr = progress.use();
@@ -43,7 +43,7 @@ function Notes({ lesson }: { lesson: Lesson }) {
   </div>;
 }
 
-export default function LessonPage({ lesson, module, open, next, openSettings }: { lesson: Lesson; module?: Module; open: (id: string) => void; next?: () => void; openSettings: () => void }) {
+export default function LessonPage({ lesson, module, open, next, openSettings, active = true }: { lesson: Lesson; module?: Module; open: (id: string) => void; next?: () => void; openSettings: () => void; active?: boolean }) {
   const [outline, setOutline] = useState(false);
   const [side, setSide] = useState(true);
   const [tab, setTab] = useState<"kit" | "notes">("kit");
@@ -77,17 +77,19 @@ export default function LessonPage({ lesson, module, open, next, openSettings }:
       <Button size="sm" variant={side && tab === "kit" ? "outline" : "ghost"} onClick={() => { setSide(true); setTab("kit"); }}><MessageCircle size={14} />Ask Kit</Button>
       <Button size="icon" variant="ghost" aria-label="Toggle side panel" onClick={() => setSide(!side)}><PanelRight size={16} /></Button>
     </div>
-    <div className="flex min-h-0 flex-1">
-      {outline && <div className="w-64 shrink-0 border-r border-border"><Outline current={lesson.id} open={open} /></div>}
-      <div className="min-w-0 flex-1">
-        {lesson.kind === "scrim" && <Scrim key={lesson.id} lesson={lesson} api={api} onChange={custom ? saveCustom : undefined} />}
-        {lesson.kind === "practice" && <Practice key={lesson.id} lesson={lesson} api={api} />}
-        {lesson.kind === "quiz" && <Quiz key={lesson.id} lesson={lesson} api={api} />}
-      </div>
-      {side && <div className="flex w-[340px] shrink-0 flex-col border-l border-border">
-        <Tabs tabs={[{ id: "kit", label: "Kit (AI tutor)" }, { id: "notes", label: "Notes" }]} value={tab} onChange={setTab} />
-        <div className="min-h-0 flex-1">{tab === "kit" ? <Tutor getContext={() => ctx.current} draft={draft} onDraftUsed={() => setDraft(undefined)} openSettings={openSettings} /> : <Notes lesson={lesson} />}</div>
-      </div>}
-    </div>
+    <Split id="outline" size={18} min={180} className="flex-1">
+      {outline && <Outline current={lesson.id} open={open} />}
+      <Split id="side" side="end" size={26} min={260} className="flex-1">
+        <div className="min-h-0 flex-1">
+          {lesson.kind === "scrim" && <Scrim key={lesson.id} lesson={lesson} api={api} active={active} onChange={custom ? saveCustom : undefined} />}
+          {lesson.kind === "practice" && <Practice key={lesson.id} lesson={lesson} api={api} />}
+          {lesson.kind === "quiz" && <Quiz key={lesson.id} lesson={lesson} api={api} />}
+        </div>
+        {side && <>
+          <Tabs tabs={[{ id: "kit", label: "Kit (AI tutor)" }, { id: "notes", label: "Notes" }]} value={tab} onChange={setTab} />
+          <div className="min-h-0 flex-1">{tab === "kit" ? <Tutor getContext={() => ctx.current} draft={draft} onDraftUsed={() => setDraft(undefined)} openSettings={openSettings} /> : <Notes lesson={lesson} />}</div>
+        </>}
+      </Split>
+    </Split>
   </div>;
 }

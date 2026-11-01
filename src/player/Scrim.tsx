@@ -1,7 +1,7 @@
 // Scrimba-style lesson: narration + the instructor's code typing itself into a real editor + a live preview.
 // Pause any time and the editor is yours; your version is kept separately and pressing play returns to the lesson.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Captions, CheckCircle2, ChevronRight, Lightbulb, Loader2, MessageCircleQuestion, Pause, Play, Play as RunIcon, RotateCcw, Sparkles, Undo2, UserPen, Wand2 } from "lucide-react";
+import { Captions, CheckCircle2, ChevronRight, Lightbulb, Loader2, MessageCircleQuestion, Pause, Play, Play as RunIcon, RotateCcw, Sparkles, Undo2, UserPen, Volume2, VolumeX, Wand2 } from "lucide-react";
 import { selectedModel } from "../ai";
 import { adaptLesson } from "../ai/generate";
 import { aiCheck } from "../ai/tutor";
@@ -10,7 +10,7 @@ import type { Files, ScrimLesson } from "../course/types";
 import Markdown from "../Markdown";
 import { browserSpeak, browserStop, narration, synth } from "../narration";
 import { errText, markDone, prefs, progress } from "../store";
-import { Badge, Button, Input, Select, cn } from "../ui";
+import { Badge, Button, Input, Select, Split, cn } from "../ui";
 import Editor from "./Editor";
 import Preview, { type PreviewHandle, type TestResult } from "./Preview";
 import { buildTimeline, estimateSeconds, frameAt, segmentAt } from "./timeline";
@@ -37,7 +37,7 @@ export function MoreButton({ api, label = "Practice this" }: { api: LessonApi; l
   </span>;
 }
 
-export default function Scrim({ lesson: original, api, onChange }: { lesson: ScrimLesson; api: LessonApi; onChange?: (l: ScrimLesson) => void }) {
+export default function Scrim({ lesson: original, api, onChange, active = true }: { lesson: ScrimLesson; api: LessonApi; onChange?: (l: ScrimLesson) => void; active?: boolean }) {
   const p = prefs.use();
   const nar = narration.use();
   const kitten = nar.status === "ready";
@@ -49,7 +49,7 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
   const [adaptText, setAdaptText] = useState("");
   const [adapting, setAdapting] = useState("");
   const [aiNote, setAiNote] = useState<{ ok: boolean; text: string } | null>(null);
-  const [t, setT] = useState(0);
+  const [t, setT] = useState(() => tl.segments[progress.get().pos[original.id] ?? 0]?.start ?? 0); // resume where the student left off
   const [playing, setPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
   const [mine, setMine] = useState<Files | null>(null); // student's take-over copy while paused
@@ -61,7 +61,7 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
   const [finished, setFinished] = useState(false);
   const preview = useRef<PreviewHandle>(null);
   const audio = useRef<HTMLAudioElement>(null);
-  const live = useRef({ t: 0, tl, playing: false, step: -1, durations, lastRunKey: "", buffering: false });
+  const live = useRef({ t, tl, playing: false, step: -1, durations, lastRunKey: "", buffering: false });
   live.current.tl = tl;
   live.current.durations = durations;
 
@@ -71,6 +71,13 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
   const files = editing ? mine! : frame.files;
   const open = (editing ? tab : null) ?? (playing ? frame.open : tab ?? frame.open);
   const challenge = challengeAt != null ? tl.segments[challengeAt]?.step.challenge : undefined;
+
+  // remember the step for "resume" on Home; markDone clears it at the end
+  useEffect(() => {
+    if (frame.index > 0 || progress.get().pos[lesson.id] != null) progress.set((pr) => ({ ...pr, pos: { ...pr.pos, [lesson.id]: frame.index } }));
+  }, [frame.index]);
+  useEffect(() => { if (!active) setPlaying(false); }, [active]); // another page (Settings) is showing
+  useEffect(() => { if (audio.current) audio.current.volume = p.volume; }, [p.volume]);
 
   // ---- narration clips ----
   const want = useCallback((i: number) => {
@@ -126,6 +133,7 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
       if (c) {
         el.src = c.url;
         el.playbackRate = prefs.get().rate;
+        el.volume = prefs.get().volume;
         el.currentTime = Math.max(0, into);
         await el.play().catch(() => {});
       }
@@ -261,9 +269,9 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
   const names = Object.keys(files);
   return <div className="flex h-full min-h-0 flex-col">
     <audio ref={audio} preload="auto" />
-    <div className="grid min-h-0 flex-1 grid-cols-2">
+    <Split id="scrim-code" dir="auto" className="flex-1">
       {/* editor */}
-      <div className="flex min-h-0 flex-col border-r border-border">
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex items-center gap-0.5 overflow-x-auto border-b border-border bg-surface px-1">
           {names.map((n) => <button key={n} onClick={() => setTab(n)} className={cn("whitespace-nowrap border-b-2 px-3 py-2 font-mono text-xs cursor-pointer", n === open ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg")}>{n}</button>)}
           <div className="ml-auto flex items-center gap-1 pr-1">
@@ -276,13 +284,13 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
         <div className="relative min-h-0 flex-1">
           <Editor file={open} value={files[open] ?? ""} readOnly={playing} onChange={edit} onRun={runMine}
             highlight={editing ? undefined : frame.highlight} caret={playing && open === frame.open ? frame.caret : undefined} fontSize={p.fontSize} dark={p.theme === "dark"} />
-          {!playing && !editing && !challenge && t > 0 && !finished && <div className="pointer-events-none absolute right-3 top-3 rounded-md bg-surface/90 px-2 py-1 text-[11px] text-muted shadow">Paused. Try typing: the editor is yours!</div>}
+          {!playing && !editing && !challenge && t > 0 && !finished && <div className="pointer-events-none absolute bottom-3 right-3 rounded-md bg-surface/90 px-2 py-1 text-[11px] text-muted shadow">Paused. Try typing: the editor is yours!</div>}
           {p.captions && seg && (playing || buffering) && <div className="pointer-events-none absolute inset-x-6 bottom-4 flex justify-center">
             <div className="max-w-2xl rounded-lg bg-black/80 px-3 py-1.5 text-center text-sm text-white">{seg.step.say}</div></div>}
         </div>
       </div>
       {/* preview / challenge */}
-      <div className="flex min-h-0 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         {challenge && <div className="max-h-[55%] shrink-0 overflow-y-auto border-b border-border bg-accent/5 p-3">
           <div className="mb-1 flex items-center gap-2 text-sm font-semibold"><span className="rounded bg-violet-500/20 px-1.5 py-0.5 text-xs text-violet-400">Your turn</span>Challenge</div>
           <Markdown text={challenge.task} className="text-sm" />
@@ -302,22 +310,19 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
           <Markdown untrusted text={aiNote.text} /></div>}
         <div className="min-h-0 flex-1"><Preview ref={preview} onAsk={api.ask} /></div>
       </div>
-    </div>
+    </Split>
     {(adaptOpen || adapting) && <form className="flex items-center gap-2 border-t border-border bg-accent/5 px-3 py-2" onSubmit={(e) => { e.preventDefault(); adapt(adaptText); }}>
       <Wand2 size={15} className="shrink-0 text-accent" />
       {adapting ? <span className="flex items-center gap-2 text-sm text-muted"><Loader2 size={14} className="animate-spin" />Changing the lesson for you: “{adapting}”</span> : <>
         <Input autoFocus className="h-8 flex-1" placeholder="What would help? e.g. “explain that again more slowly”, “show it with a pet shop”, “let me build a quiz game”" value={adaptText} onChange={(e) => setAdaptText(e.target.value)} />
-        <Mic onText={(t) => { setAdaptText(t); adapt(t); }} />
+        <Mic onText={(t) => setAdaptText((x) => (x.trim() ? `${x.trimEnd()} ${t}` : t))} />
         <Button size="sm" type="submit" variant="primary" disabled={!adaptText.trim()}>Go</Button>
         <div className="hidden gap-1 xl:flex">{["Explain that again, slower", "Show me another example", "Go deeper", "Let me practice this"].map((q) => <Button key={q} size="sm" variant="ghost" onClick={() => adapt(q)}>{q}</Button>)}</div>
         <Button size="sm" variant="ghost" onClick={() => setAdaptOpen(false)}>Cancel</Button></>}
     </form>}
-    {/* player bar */}
-    <div className="flex items-center gap-3 border-t border-border bg-surface px-3 py-2">
-      <Button variant="primary" size="icon" aria-label={playing ? "Pause" : "Play"} onClick={playing ? pause : play}>
-        {buffering ? <Loader2 size={16} className="animate-spin" /> : playing ? <Pause size={16} /> : <Play size={16} />}</Button>
-      <span className="w-24 font-mono text-xs text-muted">{fmt(t)} / {fmt(tl.total)}</span>
-      <div className="relative h-6 flex-1 cursor-pointer" role="slider" aria-label="Lesson timeline" aria-valuemin={0} aria-valuemax={Math.round(tl.total)} aria-valuenow={Math.round(t)} tabIndex={0}
+    {/* player bar: timeline on its own row so it never gets squeezed */}
+    <div className="border-t border-border bg-surface px-3 pb-2 pt-1">
+      <div className="relative h-5 cursor-pointer" role="slider" aria-label="Lesson timeline" aria-valuemin={0} aria-valuemax={Math.round(tl.total)} aria-valuenow={Math.round(t)} tabIndex={0}
         onKeyDown={(e) => { if (e.key === "ArrowRight") seek(t + 5); if (e.key === "ArrowLeft") seek(t - 5); }}
         onMouseDown={(e) => { const r = e.currentTarget.getBoundingClientRect(); seek(((e.clientX - r.left) / r.width) * tl.total); }}>
         <div className="absolute inset-x-0 top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-border" />
@@ -325,14 +330,24 @@ export default function Scrim({ lesson: original, api, onChange }: { lesson: Scr
         {tl.segments.map((s, i) => s.step.challenge && <div key={i} title="Challenge" className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-violet-500" style={{ left: `${((s.start + s.dur) / tl.total) * 100}%` }} />)}
         {saved && <div title="You edited code in this lesson" className="absolute top-0 h-1.5 w-1.5 rounded-full bg-yellow-400" style={{ left: 0 }} />}
       </div>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <Button variant="primary" size="icon" aria-label={playing ? "Pause" : "Play"} onClick={playing ? pause : play}>
+        {buffering ? <Loader2 size={16} className="animate-spin" /> : playing ? <Pause size={16} /> : <Play size={16} />}</Button>
+      <span className="mr-auto font-mono text-xs text-muted">{fmt(t)} / {fmt(tl.total)}</span>
       <Select aria-label="Speed" className="h-8 w-20! text-xs" value={p.rate} onChange={(e) => { prefs.set((x) => ({ ...x, rate: Number(e.target.value) })); if (audio.current) audio.current.playbackRate = Number(e.target.value); }}>
         {[0.75, 1, 1.25, 1.5, 2].map((r) => <option key={r} value={r}>{r}x</option>)}</Select>
+      <span className="flex items-center gap-1">
+        <Button size="icon" variant="ghost" aria-label={p.volume ? "Mute narration" : "Unmute narration"} title="Narration volume"
+          onClick={() => prefs.set((x) => ({ ...x, volume: x.volume ? 0 : 1 }))}>{p.volume ? <Volume2 size={15} /> : <VolumeX size={15} />}</Button>
+        <input type="range" aria-label="Narration volume" min={0} max={1} step={0.05} value={p.volume} className="w-20 accent-[var(--accent)]"
+          onChange={(e) => prefs.set((x) => ({ ...x, volume: Number(e.target.value) }))} />
+      </span>
       <Button size="icon" variant={p.captions ? "outline" : "ghost"} aria-label="Captions" onClick={() => prefs.set((x) => ({ ...x, captions: !x.captions }))}><Captions size={15} /></Button>
       <Button size="icon" variant="ghost" aria-label="Restart" onClick={() => seek(0)}><RotateCcw size={15} /></Button>
       <Button size="sm" variant={adaptOpen ? "outline" : "ghost"} disabled={!selectedModel()} title={selectedModel() ? "Ask the AI to change what comes next in this lesson" : "Pick an AI model in Settings to change lessons"} onClick={() => { setPlaying(false); setAdaptOpen(!adaptOpen); }}><Wand2 size={14} />Change this lesson</Button>
       {!kitten && nar.status !== "off" && <span className="text-[11px] text-muted" title="Set up Kitten TTS in Settings for natural narration">system voice</span>}
       {finished && api.morePractice && <MoreButton api={api} />}
       {finished && api.next && <Button variant="primary" size="sm" onClick={api.next}>Next lesson <ChevronRight size={12} /></Button>}
-    </div>
+    </div></div>
   </div>;
 }

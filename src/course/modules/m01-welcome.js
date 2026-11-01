@@ -84,29 +84,29 @@ Then press **Run** (or **Ctrl+S**) and look at the console. When you're ready, p
     {
       kind: "practice",
       id: "m01-practice-log",
-      title: "Practice: print and change",
+      title: "Practice: print messages",
       type: "fill",
-      task: `Fill in the blanks (\`___\`) so that:
+      task: `Fill in the blanks (\`___\`) so that the console prints two messages, in this order:
 
-1. The console prints **Ready to learn!**
-2. The heading on the page says **My learning journey**
+1. **Ready to learn!**
+2. **Time to code!**
 
 Press **Run** to try it, then **Check my code**.`,
       files: {
         "index.html": html,
-        "index.js": 'console.___("Ready to learn!");\n\nconst heading = document.querySelector("___");\nheading.textContent = "My learning journey";\n',
+        "index.js": 'console.___("Ready to learn!");\nconsole.log("___");\n',
       },
       solution: {
-        "index.js": 'console.log("Ready to learn!");\n\nconst heading = document.querySelector("h1");\nheading.textContent = "My learning journey";\n',
+        "index.js": 'console.log("Ready to learn!");\nconsole.log("Time to code!");\n',
       },
       hints: [
         "The first blank is the word we use to print messages to the console.",
-        "The second blank is the name of the tag for the big heading in index.html.",
-        'The answers are `log` and `h1`.',
+        "The second blank goes inside the quotes: it is the text of the second message.",
+        "The answers are `log` and `Time to code!`.",
       ],
       tests: [
         { name: 'The console prints "Ready to learn!"', code: 'return logs.some((l) => l.includes("Ready to learn!"));' },
-        { name: 'The heading says "My learning journey"', code: 'return text("h1") === "My learning journey";' },
+        { name: 'Then it prints "Time to code!"', code: 'const i = logs.findIndex((l) => l.includes("Ready to learn!")); const j = logs.findIndex((l) => l.includes("Time to code!")); return i >= 0 && j > i;' },
       ],
     },
     {
@@ -126,6 +126,7 @@ heading.textContent = "I changed this with JavaScript!";
 - \`document\` is the whole page.
 - \`document.querySelector("h1")\` finds the first \`<h1>\` on the page.
 - \`.textContent = "..."\` replaces the text inside it.
+- \`document.querySelector("#title")\` finds the element whose \`id\` is \`title\`. A hash sign (\`#\`) before the name means "look for this id".
 - \`const heading = ...\` gives that element a name so we can use it on the next line. You'll learn all about \`const\` in the next module.
 
 React, which you'll learn soon, is a tool that does this kind of page-changing for you in a much easier way.`,
@@ -173,6 +174,7 @@ Press **Run** to see it.`,
           files: { "index.js": 'const heading = document.querySelector("h1");\nheading.textContent = "I changed this with JavaScript!";\n\nconst paragraph = document.querySelector("p");\nparagraph.textContent = "JavaScript is fun!";\n' },
           highlight: 'paragraph.textContent = "JavaScript is fun!";',
         },
+        { say: "One more tip. If an element has an id, we find it by writing a hash sign, then the id, inside the quotes. For example, query selector of hash title finds the element whose id is title. You'll see this soon." },
         { say: "Finding things on the page and changing them by hand works, but in big apps it gets messy fast. That's exactly the problem React solves, and you'll be building React apps sooner than you think." },
         { say: "Before React, we'll learn a few JavaScript basics, one small step at a time. You did great today. Let's practice!" },
       ],
