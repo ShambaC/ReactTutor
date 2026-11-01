@@ -21,7 +21,7 @@ export function persisted<T extends object>(key: string | null, initial: T) {
 /** Per-lesson progress and the student's own code. */
 export interface Progress {
   done: Record<string, true>;
-  /** Student's edited files per lesson (kept separate from the instructor's code, like Scrimba). */
+  /** Student's edited files per lesson (kept separate from the instructor's code). */
   code: Record<string, Record<string, string>>;
   /** Wrong quiz answers to revisit in Review. key = lessonId#questionIndex */
   review: Record<string, number>;

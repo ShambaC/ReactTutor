@@ -37,7 +37,7 @@ export function contextBlock(c: TutorContext): string {
 
 export interface CheckResult { correct: boolean; explanation: string }
 
-/** Scrimba-style AI check: judges against the task description first, the reference solution second. Never gives away the answer on a miss. */
+/** AI check: judges against the task description first, the reference solution second. Never gives away the answer on a miss. */
 export async function aiCheck(task: string, starter: Files, solution: Files, student: Files): Promise<CheckResult> {
   const show = (f: Files) => Object.entries(f).map(([n, s]) => `--- ${n} ---\n${s}`).join("\n");
   const messages: ChatMessage[] = [

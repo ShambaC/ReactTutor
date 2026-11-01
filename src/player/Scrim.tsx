@@ -1,4 +1,4 @@
-// Scrimba-style lesson: narration + the instructor's code typing itself into a real editor + a live preview.
+// Interactive lesson: narration + the instructor's code typing itself into a real editor + a live preview.
 // Pause any time and the editor is yours; your version is kept separately and pressing play returns to the lesson.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Captions, CheckCircle2, ChevronRight, Lightbulb, Loader2, MessageCircleQuestion, Pause, Play, Play as RunIcon, RotateCcw, Sparkles, Undo2, UserPen, Volume2, VolumeX, Wand2 } from "lucide-react";
