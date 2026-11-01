@@ -95,7 +95,9 @@ export function synth(text: string): Promise<Clip> | null {
       .then(async (r) => {
         const j = await r.json();
         if (!r.ok) throw new Error(j.error ?? `narration failed (${r.status})`);
-        return { url: `http://127.0.0.1:${port}/audio?path=${encodeURIComponent(j.path)}`, duration: j.duration };
+        // a blob URL is seekable (the server has no Range support), so resuming mid-sentence starts mid-sentence
+        const wav = await fetch(`http://127.0.0.1:${port}/audio?path=${encodeURIComponent(j.path)}`).then((a) => a.blob());
+        return { url: URL.createObjectURL(wav), duration: j.duration };
       });
     p.catch(() => cache.delete(key));
     cache.set(key, p);
@@ -118,10 +120,12 @@ export function speakable(text: string): string {
 }
 
 // ---------- browser speech fallback ----------
-export function browserSpeak(text: string, rate: number): void {
+/** `from` (0-1) skips that share of the words, for resuming partway through a sentence. */
+export function browserSpeak(text: string, rate: number, from = 0): void {
   if (!("speechSynthesis" in window)) return;
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(speakable(text));
+  const words = speakable(text).split(" ");
+  const u = new SpeechSynthesisUtterance(words.slice(Math.floor(words.length * from)).join(" "));
   u.rate = rate;
   u.volume = prefs.get().volume;
   const v = speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang) && /natural|online|aria|jenny|zira/i.test(x.name)) ?? speechSynthesis.getVoices().find((x) => /en[-_]/i.test(x.lang));

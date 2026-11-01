@@ -137,8 +137,8 @@ export default function Scrim({ lesson: original, api, onChange, active = true }
         el.currentTime = Math.max(0, into);
         await el.play().catch(() => {});
       }
-    } else if (prefs.get().engine !== "off" && into < 0.5) {
-      browserSpeak(s.step.say, prefs.get().rate);
+    } else if (prefs.get().engine !== "off" && into < s.dur - PAD - 0.5) {
+      browserSpeak(s.step.say, prefs.get().rate, Math.max(0, into) / (s.dur - PAD));
     }
   }, [want]);
 
