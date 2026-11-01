@@ -166,6 +166,15 @@ Linux installers and attaches them to it. The app version comes from `package.js
 - Speech-to-text: [faster-whisper](https://github.com/SYSTRAN/faster-whisper).
 - Built with [Tauri](https://tauri.app), [React](https://react.dev) and [CodeMirror](https://codemirror.net).
 
+## Story
+
+<details>
+<summary>How this project came to be</summary>
+
+I whipped this up for my girlfriend, who had to learn React for her job and was struggling with her study materials. So, I made an interactive and fun course for her to study.
+
+</details>
+
 ---
 
 <div align="center">

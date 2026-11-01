@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>React Tutor – Learn JavaScript & React for Free with an AI Tutor</title>
+<meta name="description" content="React Tutor is a free desktop app that teaches JavaScript, React and React Router to complete beginners: 142 narrated, interactive coding lessons with a live preview, practice exercises, quizzes and Kit, an AI tutor. Works offline on Windows and Linux." />
+<meta name="author" content="ShambaC" />
+<meta name="theme-color" content="#fff4df" />
+<meta name="color-scheme" content="light" />
+<link rel="canonical" href="https://shambac.github.io/ReactTutor/" />
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="React Tutor" />
+<meta property="og:title" content="React Tutor – Learn JavaScript & React from zero, free" />
+<meta property="og:description" content="142 narrated coding lessons that type themselves into a real editor. Pause anytime and the code is yours. Free for Windows and Linux." />
+<meta property="og:url" content="https://shambac.github.io/ReactTutor/" />
+<meta property="og:image" content="https://shambac.github.io/ReactTutor/assets/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="React Tutor: a kitten mascot next to the lesson player" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="React Tutor – Learn JavaScript & React from zero, free" />
+<meta name="twitter:description" content="142 narrated coding lessons, a live preview, practice and an AI tutor. Free for Windows and Linux." />
+<meta name="twitter:image" content="https://shambac.github.io/ReactTutor/assets/og.png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "React Tutor",
+      "url": "https://shambac.github.io/ReactTutor/",
+      "downloadUrl": "https://github.com/ShambaC/ReactTutor/releases/latest",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Windows 10, Windows 11, Linux",
+      "description": "A free desktop app that teaches JavaScript, React and React Router to complete beginners with narrated interactive lessons, a live preview, practice exercises and an AI tutor.",
+      "image": "https://shambac.github.io/ReactTutor/assets/og.png",
+      "screenshot": "https://shambac.github.io/ReactTutor/assets/screens/lesson.webp",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "author": { "@type": "Person", "name": "ShambaC" }
+    },
+    {
+      "@type": "Course",
+      "name": "Learn JavaScript, React and React Router from zero",
+      "description": "142 interactive lessons in 20 modules: JavaScript foundations, React, React Router and a capstone Recipe Book app.",
+      "provider": { "@type": "Organization", "name": "React Tutor", "sameAs": "https://github.com/ShambaC/ReactTutor" },
+      "educationalLevel": "Beginner",
+      "isAccessibleForFree": true,
+      "hasCourseInstance": { "@type": "CourseInstance", "courseMode": "Online" },
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD", "category": "Free" }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        { "@type": "Question", "name": "Is React Tutor free?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. The app and all 142 lessons are free. Kit, the AI tutor, uses your own ChatGPT plan or an API key, so any AI usage is billed by that provider." } },
+        { "@type": "Question", "name": "Do I need to know how to code?", "acceptedAnswer": { "@type": "Answer", "text": "No. The first lesson starts with what a code editor is." } },
+        { "@type": "Question", "name": "Does React Tutor work offline?", "acceptedAnswer": { "@type": "Answer", "text": "Yes. Lessons, the voice and speech-to-text run on your computer. Only Kit needs internet, unless you use a local AI model." } },
+        { "@type": "Question", "name": "Do I need Node.js or VS Code?", "acceptedAnswer": { "@type": "Answer", "text": "No. The editor, browser preview and console are built in." } }
+      ]
+    }
+  ]
+}
+</script>
+
+<style>
+:root {
+  --cream: #fff4df; --ink: #1d1a24; --ink-2: #4b4556;
+  --coral: #ff7a59; --sun: #ffd23f; --mint: #7ee2b8; --sky: #8fd3ff; --lilac: #c9b6ff;
+  --line: 3px solid var(--ink); --pop: 6px 6px 0 var(--ink); --pop-sm: 4px 4px 0 var(--ink);
+  --head: "Bricolage Grotesque", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--cream); color: var(--ink); font: 400 18px/1.55 var(--body); overflow-x: hidden; }
+img { max-width: 100%; height: auto; display: block; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--head); font-weight: 800; line-height: 1; letter-spacing: -.02em; margin: 0; }
+h2 { font-size: clamp(40px, 6vw, 72px); }
+.wrap { width: min(1180px, 100% - 32px); margin-inline: auto; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* chunky button: presses down into its shadow */
+.btn { display: inline-flex; align-items: center; gap: 10px; font: 800 19px var(--head); text-decoration: none; color: var(--ink);
+  background: var(--sun); border: var(--line); border-radius: 14px; padding: 14px 24px; box-shadow: var(--pop); transition: transform .12s, box-shadow .12s; cursor: pointer; }
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--ink); }
+.btn:active { transform: translate(6px, 6px); box-shadow: 0 0 0 var(--ink); }
+.btn.sm { font-size: 15px; padding: 8px 14px; border-radius: 10px; box-shadow: var(--pop-sm); }
+.btn.sm:active { transform: translate(4px, 4px); }
+.btn svg { width: 20px; height: 20px; }
+
+/* top */
+.top { display: flex; align-items: center; gap: 18px; padding: 18px 0; }
+.logo { white-space: nowrap; display: flex; align-items: center; gap: 10px; font: 800 22px var(--head); text-decoration: none; }
+.logo img { width: 40px; height: 40px; border-radius: 10px; border: var(--line); }
+.top .gh { margin-left: auto; font-weight: 700; text-decoration: none; }
+.top .gh:hover { text-decoration: underline; }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 40px 0 96px; }
+.hero h1 { font-size: clamp(48px, 6.2vw, 86px); }
+.hero h1 .hl { background: var(--mint); border: var(--line); border-radius: 16px; padding: 0 .14em; display: inline-block; transform: rotate(-2deg); box-shadow: var(--pop-sm); }
+.hero p { font-size: 21px; color: var(--ink-2); margin: 26px 0 32px; max-width: 30ch; }
+.hero .also { display: block; margin-top: 14px; font-size: 15px; color: var(--ink-2); }
+.stage { position: relative; }
+.shot { border: var(--line); border-radius: 18px; overflow: hidden; box-shadow: 10px 10px 0 var(--ink); background: #13171e; }
+.stage .shot { transform: rotate(1.5deg); }
+.stage .kit { position: absolute; width: 38%; right: -6%; top: -30%; z-index: 2; filter: drop-shadow(4px 4px 0 var(--ink)); }
+.sticker { position: absolute; z-index: 3; font: 800 16px var(--head); background: var(--sky); border: var(--line); border-radius: 999px; padding: 8px 16px; box-shadow: var(--pop-sm); white-space: nowrap; transition: transform .2s; }
+.sticker:hover { transform: rotate(0) scale(1.06) !important; }
+.s1 { left: -5%; top: 8%; transform: rotate(-8deg); background: var(--sun); }
+.s2 { left: 8%; bottom: -7%; transform: rotate(5deg); background: var(--lilac); }
+.s3 { right: 6%; bottom: -9%; transform: rotate(-4deg); }
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; padding-bottom: 72px; }
+  .stage { margin: 70px 12px 0 0; }
+}
+
+/* section heads */
+.head { display: flex; align-items: end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 36px; }
+.head p { margin: 0; color: var(--ink-2); font-size: 19px; }
+section { padding: 72px 0; }
+
+/* toys */
+.toys { display: grid; grid-template-columns: 1.35fr 1fr; grid-template-rows: auto auto; gap: 28px; }
+.toy { border: var(--line); border-radius: 22px; box-shadow: var(--pop); padding: 24px; position: relative; }
+.toy h3 { font-size: 34px; margin-bottom: 4px; }
+.toy .tag { font-size: 16px; color: var(--ink-2); margin: 0 0 18px; }
+.toy.watch { background: var(--sun); grid-row: span 2; }
+.toy.turn { background: var(--mint); transform: rotate(.8deg); }
+.toy.break { background: var(--coral); transform: rotate(-.8deg); }
+.watch .code { min-height: 190px; }
+.code { background: #1d1f2b; color: #e8e6f0; border: var(--line); border-radius: 12px; padding: 14px 16px; font: 500 15px/1.7 var(--mono); white-space: pre-wrap; margin: 0; }
+.k { color: #c792ea; } .s { color: #c3e88d; } .f { color: #82aaff; } .t { color: #ff8a80; } .cm { color: #8a86a0; font-style: italic; }
+.caret { display: inline-block; width: 2px; height: 1.1em; background: var(--sun); vertical-align: text-bottom; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.page { background: #fff; border: var(--line); border-radius: 12px; padding: 14px 18px; margin-top: 14px; font-family: system-ui, sans-serif; }
+.page .bar { font: 500 12px var(--mono); color: #777; margin-bottom: 8px; }
+.page b { font-size: 26px; display: block; margin-bottom: 8px; }
+.page button { font: 700 15px system-ui; background: #4f46e5; color: #fff; border: 0; border-radius: 6px; padding: 7px 14px; cursor: pointer; }
+.page button:disabled { opacity: .55; cursor: default; }
+.watch .play { margin-top: 16px; }
+.watch .cap { margin-top: 14px; background: var(--ink); color: #fff; border-radius: 10px; padding: 10px 14px; font-size: 16px; min-height: 48px; }
+.code input { font: inherit; color: #c3e88d; background: #2c2f40; border: 2px dashed #6c6a85; border-radius: 6px; padding: 0 6px; width: 9ch; }
+.code input:focus { outline: none; border-color: var(--sun); }
+.oops { margin-top: 14px; background: #fff; border: var(--line); border-radius: 12px; padding: 12px 16px; font-size: 16px; display: none; }
+.oops.on { display: block; animation: pop .25s ease-out; }
+.oops strong { display: block; font-family: var(--head); font-size: 18px; margin-bottom: 4px; }
+.oops code { font: 500 14px var(--mono); color: #c62828; }
+@keyframes pop { from { transform: scale(.94); opacity: 0; } }
+@media (max-width: 860px) { .toys { grid-template-columns: 1fr; } .toy.watch { grid-row: auto; } }
+
+/* screenshots carousel */
+.reelbox { position: relative; }
+.reel { display: flex; gap: 28px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding: 12px calc(50vw - 50%) 28px; margin: 0 calc(50% - 50vw); scrollbar-width: none; }
+.reel::-webkit-scrollbar { display: none; }
+.arrow { position: absolute; top: calc(50% - 34px); z-index: 4; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--sun); border: var(--line); box-shadow: var(--pop-sm); cursor: pointer; transition: transform .12s, box-shadow .12s, opacity .2s; }
+.arrow svg { width: 26px; height: 26px; }
+.arrow:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.arrow:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--ink); }
+.arrow:disabled { opacity: 0; pointer-events: none; }
+.arrow.prev { left: -30px; } .arrow.next { right: -30px; }
+.count { font: 800 22px var(--head); }
+@media (max-width: 1260px) { .arrow.prev { left: 4px; } .arrow.next { right: 4px; } }
+@media (max-width: 600px) { .arrow { width: 46px; height: 46px; } .arrow svg { width: 20px; height: 20px; } }
+/* Lenis smooth scrolling */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: hidden; }
+.reel figure { flex: 0 0 min(760px, 86vw); margin: 0; scroll-snap-align: center; position: relative; }
+.reel figure:nth-child(even) .shot { transform: rotate(-1deg); }
+.reel figure:nth-child(odd) .shot { transform: rotate(1deg); }
+.reel figcaption { position: absolute; left: 18px; bottom: -14px; font: 800 17px var(--head); background: var(--cream); border: var(--line); border-radius: 999px; padding: 6px 14px; box-shadow: var(--pop-sm); }
+
+/* the course as a map */
+.map { border: var(--line); border-radius: 26px; background: #fff; box-shadow: var(--pop); padding: 36px 28px; }
+.worlds { display: grid; grid-template-columns: 8fr 8fr 3fr 1.6fr; gap: 18px; }
+.world h3 { font-size: 22px; margin-bottom: 4px; }
+.world small { color: var(--ink-2); font-size: 15px; }
+.dots { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.dot { width: 44px; height: 44px; border: var(--line); border-radius: 50%; display: grid; place-items: center; font: 800 15px var(--head); cursor: default; position: relative; transition: transform .15s; }
+.dot:hover, .dot:focus { transform: translateY(-4px) rotate(-6deg); outline: none; }
+.dot::after { content: attr(data-name); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); white-space: nowrap; font: 700 14px var(--body); background: var(--ink); color: #fff; padding: 5px 10px; border-radius: 8px; opacity: 0; pointer-events: none; transition: opacity .15s; z-index: 5; }
+.dot:hover::after, .dot:focus::after { opacity: 1; }
+.js .dot { background: var(--sun); } .re .dot { background: var(--sky); } .ro .dot { background: var(--lilac); } .cp .dot { background: var(--coral); }
+.cp .dot { width: 56px; height: 56px; font-size: 22px; }
+.map details { margin-top: 26px; font-size: 16px; }
+.map summary { cursor: pointer; font-weight: 700; }
+.map ol { columns: 3; column-gap: 32px; margin: 14px 0 0; padding-left: 22px; color: var(--ink-2); }
+@media (max-width: 900px) { .worlds { grid-template-columns: 1fr 1fr; } .map ol { columns: 1; } }
+@media (max-width: 520px) { .worlds { grid-template-columns: 1fr; } }
+
+/* kit */
+.kitrow { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; align-items: center; }
+.kitrow img { width: 100%; filter: drop-shadow(5px 5px 0 var(--ink)); }
+.bubble { position: relative; background: #fff; border: var(--line); border-radius: 24px; padding: 26px 28px; box-shadow: var(--pop); font-size: 22px; }
+.bubble::before { content: ""; position: absolute; left: -22px; top: 46%; width: 30px; height: 30px; background: #fff; border-left: var(--line); border-bottom: var(--line); transform: rotate(45deg); }
+.bubble b { font-family: var(--head); }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.chips span { font: 700 15px var(--body); background: var(--cream); border: 2px solid var(--ink); border-radius: 999px; padding: 6px 12px; }
+.kitnote { margin-top: 22px; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 760px) { .kitrow { grid-template-columns: 1fr; } .kitrow img { width: 200px; margin: 0 auto; } .bubble::before { display: none; } }
+
+/* download */
+.dl { background: var(--ink); color: #fff; border-radius: 30px; padding: clamp(36px, 6vw, 64px); display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 32px; align-items: center; position: relative; }
+.dl h2 { color: #fff; }
+.dl .btns { display: flex; flex-wrap: wrap; gap: 16px; margin: 28px 0 18px; }
+.dl .btn.linux { background: var(--mint); }
+.dl .btn { box-shadow: 6px 6px 0 #000; border-color: #000; }
+.dl .other { font-size: 15px; color: #c9c4d6; }
+.dl .other a { color: #fff; }
+.dl img { width: 100%; filter: drop-shadow(5px 5px 0 #000); }
+.dl .warn { font-size: 15px; color: #c9c4d6; margin-top: 14px; max-width: 60ch; }
+@media (max-width: 760px) { .dl { grid-template-columns: 1fr; } .dl img { width: 220px; justify-self: center; } }
+
+/* faq */
+.faq { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.faq details { background: #fff; border: var(--line); border-radius: 16px; box-shadow: var(--pop-sm); padding: 16px 20px; }
+.faq summary { cursor: pointer; font: 800 20px var(--head); list-style: none; display: flex; justify-content: space-between; gap: 12px; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: "+"; transition: transform .2s; }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq p { margin: 10px 0 0; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 760px) { .faq { grid-template-columns: 1fr; } }
+
+footer { padding: 40px 0 56px; font-size: 15px; color: var(--ink-2); }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer nav { display: flex; gap: 20px; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="#top"><img src="assets/icon-192.png" alt="" width="40" height="40" />React Tutor</a>
+    <a class="gh" href="https://github.com/ShambaC/ReactTutor">GitHub</a>
+    <a class="btn sm" href="#download">Download</a>
+  </header>
+</div>
+
+<main id="top">
+  <div class="wrap hero">
+    <div>
+      <h1>Learn React with a <span class="hl">kitten</span> in your corner.</h1>
+      <p>Free lessons that type themselves while a friendly voice explains. Pause, and it’s your turn.</p>
+      <a class="btn" href="#download" id="heroDl">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 21h16"/></svg>
+        <span id="heroDlText">Download free</span>
+      </a>
+      <span class="also">Windows &amp; Linux · no account needed</span>
+    </div>
+    <div class="stage">
+      <img class="kit" src="assets/kit-wave.webp" width="687" height="720" alt="Kit, the React Tutor kitten, waving" />
+      <div class="shot"><img src="assets/screens/lesson.webp" width="2160" height="1350" fetchpriority="high" alt="React Tutor lesson player: code editor teaching useState, a live preview with a Like button, narration captions and the Kit tutor panel" /></div>
+      <span class="sticker s1">142 lessons</span>
+      <span class="sticker s2">works offline</span>
+      <span class="sticker s3">free</span>
+    </div>
+  </div>
+
+  <section id="try">
+    <div class="wrap">
+      <div class="head"><h2>Go on, poke it.</h2><p>Three things every lesson does.</p></div>
+      <div class="toys">
+        <div class="toy watch">
+          <h3>Watch</h3>
+          <p class="tag">The code writes itself while you listen.</p>
+          <pre class="code" id="typer" aria-label="Code that types itself"></pre>
+          <div class="page" aria-hidden="true"><div class="bar">localhost/</div><b>Likes: <span id="likes">0</span></b><button type="button" id="likeBtn" disabled tabindex="-1">Like</button></div>
+          <div class="cap" id="cap">Press play.</div>
+          <button class="btn sm play" type="button" id="play">▶ Play</button>
+        </div>
+        <div class="toy turn">
+          <h3>Your turn</h3>
+          <p class="tag">Pause anytime. Change anything.</p>
+          <div class="code"><span class="k">const</span> name = <span class="s">"</span><input id="nameIn" value="Biscuit" maxlength="16" aria-label="Edit the name in the code" spellcheck="false" /><span class="s">"</span>;
+&lt;<span class="t">h1</span>&gt;Hi, {name}!&lt;/<span class="t">h1</span>&gt;</div>
+          <div class="page" aria-live="polite"><b id="hiOut">Hi, Biscuit!</b></div>
+        </div>
+        <div class="toy break">
+          <h3>Break it</h3>
+          <p class="tag">Mistakes get explained in plain English.</p>
+          <pre class="code"><span id="bugLine">consle</span>.log(<span class="s">"hi"</span>);</pre>
+          <button class="btn sm" type="button" id="runBug" style="margin-top:14px;background:#fff">▶ Run</button>
+          <div class="oops" id="oops" role="status"><strong>Something needs a small fix. That’s completely normal!</strong><code>ReferenceError: consle is not defined</code><br />JavaScript doesn’t know anything called “consle” yet. Check the spelling (capital letters matter!).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="screens">
+    <div class="wrap">
+      <div class="head"><h2>The real thing.</h2><p class="count" id="reelCount" aria-live="polite">1 / 5</p></div>
+      <div class="reelbox">
+      <button class="arrow prev" type="button" id="reelPrev" aria-label="Previous screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="arrow next" type="button" id="reelNext" aria-label="Next screenshot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+      <div class="reel" id="reel" tabindex="0" aria-label="App screenshots">
+        <figure><div class="shot"><img src="assets/screens/lesson.webp" width="2160" height="1350" loading="lazy" alt="Lesson player with editor, live preview and captions" /></div><figcaption>Lessons</figcaption></figure>
+        <figure><div class="shot"><img src="assets/screens/practice.webp" width="2160" height="1350" loading="lazy" alt="Practice exercise with test checklist and a friendly error explanation" /></div><figcaption>Practice</figcaption></figure>
+        <figure><div class="shot"><img src="assets/screens/autocomplete.webp" width="2160" height="1350" loading="lazy" alt="Editor autocomplete suggesting useState" /></div><figcaption>Autocomplete</figcaption></figure>
+        <figure><div class="shot"><img src="assets/screens/quiz.webp" width="2160" height="1350" loading="lazy" alt="Quiz question with the answer explained" /></div><figcaption>Quizzes</figcaption></figure>
+        <figure><div class="shot"><img src="assets/screens/home.webp" width="2160" height="1350" loading="lazy" alt="Home screen with progress and modules" /></div><figcaption>Your progress</figcaption></figure>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="course">
+    <div class="wrap">
+      <div class="head"><h2>20 stops to your first app.</h2><p>Nothing locked. Start anywhere.</p></div>
+      <div class="map">
+        <div class="worlds">
+          <div class="world js"><h3>JavaScript</h3><small>55 lessons</small><div class="dots" data-from="1" data-n="Welcome|Values and variables|Functions|Making decisions|Arrays and lists|Objects and modern syntax|Pages that respond|Splitting code into files"></div></div>
+          <div class="world re"><h3>React</h3><small>56 lessons</small><div class="dots" data-from="9" data-n="Hello, React|Components and props|Lists and conditions|State and events|Forms and inputs|Thinking in React|Effects and loading data|Refs, context and hooks"></div></div>
+          <div class="world ro"><h3>Router</h3><small>23 lessons</small><div class="dots" data-from="17" data-n="React Router basics|Dynamic and nested routes|Search params and data"></div></div>
+          <div class="world cp"><h3>Build!</h3><small>8 lessons</small><div class="dots" data-from="20" data-n="Capstone: Recipe Book app"></div></div>
+        </div>
+        <details>
+          <summary>See every module</summary>
+          <ol>
+            <li>Welcome to React Tutor</li><li>Values and variables</li><li>Functions</li><li>Making decisions</li><li>Arrays and lists</li><li>Objects and modern syntax</li><li>Pages that respond</li><li>Splitting code into files</li><li>Hello, React</li><li>Components and props</li><li>Lists and conditional rendering</li><li>State and events</li><li>Forms and inputs</li><li>Thinking in React</li><li>Effects and loading data</li><li>Refs, context and custom hooks</li><li>React Router basics</li><li>Dynamic and nested routes</li><li>Search params and data routers</li><li>Capstone: Recipe Book app</li>
+          </ol>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section id="kit">
+    <div class="wrap kitrow">
+      <img src="assets/kit-wave.webp" width="687" height="720" loading="lazy" alt="" />
+      <div>
+        <div class="bubble"><b>Hi, I’m Kit!</b> Ask me anything: what a word means, why your code isn’t working, or how to build something you’re dreaming about.</div>
+        <div class="chips" aria-label="Things Kit can do"><span>🎤 just talk</span><span>✏️ reviews your code</span><span>🪄 writes new lessons</span><span>🐢 “explain slower”</span></div>
+        <p class="kitnote">Kit uses your ChatGPT plan or any of 60+ AI providers, even a model on your own computer.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap">
+      <div class="dl">
+        <div>
+          <h2>Free. Go learn.</h2>
+          <div class="btns">
+            <a class="btn" data-ext="-setup.exe" data-os="win" href="https://github.com/ShambaC/ReactTutor/releases/latest">Windows</a>
+            <a class="btn linux" data-ext=".AppImage" data-os="linux" href="https://github.com/ShambaC/ReactTutor/releases/latest">Linux</a>
+          </div>
+          <p class="other" id="other">Also <a data-ext=".msi" href="https://github.com/ShambaC/ReactTutor/releases/latest">.msi</a> · <a data-ext=".deb" href="https://github.com/ShambaC/ReactTutor/releases/latest">.deb</a> · <a data-ext=".rpm" href="https://github.com/ShambaC/ReactTutor/releases/latest">.rpm</a> · <a href="https://github.com/ShambaC/ReactTutor">source</a></p>
+          <p class="warn">Windows may say “protected your PC” because the installer isn’t signed yet: click More info, then Run anyway.</p>
+        </div>
+        <img src="assets/kit-sleep.webp" width="720" height="708" loading="lazy" alt="Kit asleep on a laptop" />
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" style="padding-top:24px">
+    <div class="wrap">
+      <div class="head"><h2>Quick answers.</h2></div>
+      <div class="faq">
+        <details><summary>Is it really free?</summary><p>Yes, all 142 lessons. Kit uses your own ChatGPT plan or API key, so AI usage is billed by that provider.</p></details>
+        <details><summary>Never coded before?</summary><p>Perfect. Lesson one starts with what a code editor is.</p></details>
+        <details><summary>Does it work offline?</summary><p>Yes. Lessons, the voice and speech-to-text run on your computer. Only Kit needs internet, unless you use a local model.</p></details>
+        <details><summary>Need Node.js or VS Code?</summary><p>No. The editor, browser preview and console are built in.</p></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>React Tutor · made by ShambaC</span>
+    <nav aria-label="Footer"><a href="https://github.com/ShambaC/ReactTutor">Source</a><a href="https://github.com/ShambaC/ReactTutor/releases">Releases</a><a href="https://github.com/ShambaC/ReactTutor/issues">Report a problem</a></nav>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// course map: one numbered dot per module, name shown on hover/focus
+document.querySelectorAll(".dots").forEach((d) => {
+  const from = +d.dataset.from;
+  d.dataset.n.split("|").forEach((name, i) => {
+    const el = document.createElement("span");
+    el.className = "dot"; el.tabIndex = 0; el.dataset.name = name; el.setAttribute("aria-label", `Module ${from + i}: ${name}`);
+    el.textContent = d.closest(".cp") ? "★" : from + i;
+    d.append(el);
+  });
+});
+
+// Watch: types the Like button from the real Module 12 lesson
+(() => {
+  const L = [
+    [["k", "const"], ["", " [count, setCount] = "], ["f", "useState"], ["", "(0);"]],
+    [],
+    [["", "<"], ["t", "button"], ["", " onClick={() =>"]],
+    [["", "  "], ["f", "setCount"], ["", "(count + 1)}>"]],
+    [["", "  Like"]],
+    [["", "</"], ["t", "button"], ["", ">"]],
+  ];
+  const caps = ["useState gives your component a memory, starting at zero.", "", "When the button is clicked…", "…we ask React to add one.", "", "Now click Like!"];
+  const pre = document.getElementById("typer"), cap = document.getElementById("cap"), play = document.getElementById("play"), btn = document.getElementById("likeBtn"), likes = document.getElementById("likes");
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const show = (line, ch) => {
+    let out = "";
+    for (let i = 0; i <= line && i < L.length; i++) {
+      let left = i < line ? Infinity : ch;
+      for (const [c, t] of L[i]) { if (left <= 0) break; const s = t.slice(0, left); left -= s.length; out += c ? `<span class="${c}">${esc(s)}</span>` : esc(s); }
+      out += i < line ? "\n" : '<span class="caret"></span>';
+    }
+    pre.innerHTML = out;
+  };
+  const idle = () => { pre.innerHTML = '<span class="cm">// press play and watch</span><span class="caret"></span>'; };
+  let running = false;
+  play.addEventListener("click", async () => {
+    if (running) return; running = true; play.disabled = true;
+    btn.disabled = true; btn.tabIndex = -1; likes.textContent = "0";
+    const wait = (ms) => new Promise((r) => setTimeout(r, reduce ? 0 : ms));
+    for (let i = 0; i < L.length; i++) {
+      if (caps[i]) cap.textContent = caps[i];
+      const n = L[i].reduce((m, [, t]) => m + t.length, 0);
+      for (let c = 0; c <= n; c++) { show(i, c); await wait(32 + Math.random() * 34); }
+      await wait(caps[i] ? 900 : 200);
+    }
+    show(L.length - 1, Infinity);
+    btn.disabled = false; btn.tabIndex = 0; btn.focus({ preventScroll: true });
+    running = false; play.disabled = false; play.textContent = "↻ Again";
+  });
+  btn.addEventListener("click", () => { likes.textContent = +likes.textContent + 1; });
+  idle();
+})();
+
+// Your turn: the name in the code drives the page
+(() => {
+  const i = document.getElementById("nameIn"), out = document.getElementById("hiOut");
+  i.addEventListener("input", () => { out.textContent = `Hi, ${i.value}!`; });
+})();
+
+// Break it: the app's real friendly message for a typo
+(() => {
+  const run = document.getElementById("runBug"), oops = document.getElementById("oops"), bug = document.getElementById("bugLine");
+  run.addEventListener("click", () => {
+    if (oops.classList.contains("on")) { oops.classList.remove("on"); bug.textContent = "console"; run.textContent = "✓ Fixed"; return; }
+    oops.classList.add("on"); run.textContent = "Fix it";
+  });
+})();
+
+// screenshot reel: arrows step one screenshot at a time
+(() => {
+  const reel = document.getElementById("reel"), prev = document.getElementById("reelPrev"), next = document.getElementById("reelNext"), count = document.getElementById("reelCount");
+  const figs = [...reel.children];
+  const left = (f) => f.offsetLeft - reel.offsetLeft; // offsets are relative to .reelbox
+  const current = () => {
+    const mid = reel.scrollLeft + reel.clientWidth / 2;
+    return figs.reduce((best, f, i) => Math.abs(left(f) + f.offsetWidth / 2 - mid) < Math.abs(left(figs[best]) + figs[best].offsetWidth / 2 - mid) ? i : best, 0);
+  };
+  const go = (i) => { const f = figs[Math.max(0, Math.min(figs.length - 1, i))]; reel.scrollTo({ left: left(f) - (reel.clientWidth - f.offsetWidth) / 2, behavior: reduce ? "auto" : "smooth" }); };
+  const update = () => {
+    const i = current();
+    count.textContent = `${i + 1} / ${figs.length}`;
+    prev.disabled = reel.scrollLeft < 4;
+    next.disabled = reel.scrollLeft > reel.scrollWidth - reel.clientWidth - 4;
+  };
+  prev.addEventListener("click", () => go(current() - 1));
+  next.addEventListener("click", () => go(current() + 1));
+  reel.addEventListener("scroll", update, { passive: true });
+  addEventListener("resize", update);
+  update();
+})();
+
+// smooth page scrolling (Lenis); in-page links glide too. Skipped for reduced motion.
+if (!reduce && window.Lenis) {
+  const lenis = new Lenis({ lerp: 0.1 });
+  const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+  requestAnimationFrame(raf);
+  document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
+    const target = document.querySelector(a.getAttribute("href"));
+    if (!target) return;
+    e.preventDefault();
+    lenis.scrollTo(target, { offset: -16 });
+    history.replaceState(null, "", a.getAttribute("href"));
+  }));
+}
+
+// direct download links from the latest GitHub release
+(() => {
+  const ua = navigator.userAgent, os = /Windows/i.test(ua) ? "win" : /Linux/i.test(ua) && !/Android/i.test(ua) ? "linux" : "";
+  if (os) document.getElementById("heroDlText").textContent = os === "win" ? "Download for Windows" : "Download for Linux";
+  fetch("https://api.github.com/repos/ShambaC/ReactTutor/releases/latest").then((r) => (r.ok ? r.json() : null)).then((rel) => {
+    if (!rel || !rel.assets) return;
+    document.querySelectorAll("[data-ext]").forEach((a) => { const f = rel.assets.find((x) => x.name.endsWith(a.dataset.ext)); if (f) a.href = f.browser_download_url; });
+    const mine = os && document.querySelector(`[data-os="${os}"]`);
+    if (mine && mine.href.includes("/download/")) document.getElementById("heroDl").href = mine.href;
+  }).catch(() => {});
+})();
+</script>
+</body>
+</html>

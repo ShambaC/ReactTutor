@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shambac.github.io/ReactTutor/sitemap.xml
